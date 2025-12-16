@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Terminal, Github } from "lucide-react";
+import { Github } from "lucide-react";
+import Logo from "./Logo";
 
 export default function Navbar() {
     return (
@@ -11,11 +12,8 @@ export default function Navbar() {
             animate={{ y: 0, opacity: 1 }}
             className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/80 backdrop-blur-md border-b border-slate-800"
         >
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
-                <div className="bg-gradient-to-tr from-blue-500 to-purple-500 p-1.5 rounded-lg">
-                    <Terminal className="w-5 h-5 text-white" />
-                </div>
-                <span>DevRecap</span>
+            <Link href="/" className="hover:opacity-80 transition">
+                <Logo size={36} showText={true} />
             </Link>
 
             <div className="flex items-center gap-6">

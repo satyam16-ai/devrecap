@@ -17,3 +17,49 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Custom Scrollbar - More Visible on Mobile */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.8) rgba(15, 23, 42, 0.3);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.9);
+}
+
+/* Mobile specific - make scrollbar always visible and blue */
+@media (max-width: 1024px) {
+  *::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.7);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: rgba(59, 130, 246, 1);
+  }
+}
