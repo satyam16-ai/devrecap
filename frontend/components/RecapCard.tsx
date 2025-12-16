@@ -45,7 +45,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
     options = { showAvatar: true, showBio: true, showHeatmap: true, showStats: true, showBadges: true, qrType: 'github', activityType: 'heatmap' }
 }: RecapCardProps) {
 
-    const qrUrl = options.qrType === 'app' ? 'https://devrecap.com' : `https://github.com/${stats.username}`;
+    const qrUrl = options.qrType === 'app' ? 'https://devrecap.site' : `https://github.com/${stats.username}`;
 
     return (
         <div
@@ -280,7 +280,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                     <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-medium text-slate-600">Generated on {new Date().getFullYear()}</span>
                         <span className={clsx("flex items-center gap-1 font-bold text-[10px]", isPremium ? "text-yellow-500" : theme.accent)}>
-                            {isPremium ? "Verified Pro Member" : "DevRecap.com"}
+                            {isPremium ? "Verified Pro Member" : "DevRecap.site"}
                         </span>
                     </div>
 

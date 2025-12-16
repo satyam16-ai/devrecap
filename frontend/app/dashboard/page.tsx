@@ -177,7 +177,7 @@ function DashboardContent() {
     };
 
     const shareToPlatform = (platform: 'whatsapp' | 'twitter') => {
-        const text = `Check out my Developer Recap! 🚀\n\nRank: ${stats?.rank}\nConsistency: ${stats?.consistencyScore}%\n\nCreate yours at: https://devrecap.com`;
+        const text = `Check out my Developer Recap! 🚀\n\nRank: ${stats?.rank}\nConsistency: ${stats?.consistencyScore}%\n\nCreate yours at: https://devrecap.site`;
 
         if (platform === 'whatsapp') {
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');

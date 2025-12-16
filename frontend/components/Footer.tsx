@@ -1,9 +1,11 @@
+import Logo from "./Logo";
+
 export default function Footer() {
     return (
         <footer className="w-full py-12 px-6 bg-slate-950 border-t border-slate-900 mt-20">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                 <div className="text-center md:text-left">
-                    <h3 className="text-lg font-bold text-white mb-2">DevRecap</h3>
+                    <Logo size={32} showText={true} className="mb-3 justify-center md:justify-start" />
                     <p className="text-slate-500 text-sm max-w-xs">
                         Building the developer identity layer. Turn your commits into career assets.
                     </p>
@@ -16,7 +18,7 @@ export default function Footer() {
                 </div>
 
                 <div className="text-xs text-slate-600">
-                    © 2025 DevRecap Inc.
+                    © 2025 DevRecap.site
                 </div>
             </div>
         </footer>
