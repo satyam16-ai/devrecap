@@ -100,6 +100,15 @@ export const fetchGitHubData = async (username: string, token?: string) => {
     return userData;
 
   } catch (error: any) {
+    if (error.response?.status === 401) {
+      const friendlyError: any = new Error(
+        `GitHub API Key is invalid or expired. Please check your GITHUB_TOKEN configuration.`
+      );
+      friendlyError.statusCode = 401;
+      friendlyError.userFriendly = true;
+      throw friendlyError;
+    }
+
     if (error.response?.status === 403 && error.response?.headers['x-ratelimit-remaining'] === '0') {
       const resetTime = error.response?.headers['x-ratelimit-reset'];
       const resetDate = resetTime ? new Date(parseInt(resetTime) * 1000) : null;
@@ -128,11 +137,19 @@ export const fetchGitHubData = async (username: string, token?: string) => {
     }
 
     console.error('Error fetching GitHub data:', error.message);
+    console.error('Error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers
+    });
+
     const friendlyError: any = new Error(
-      `We're having trouble connecting to GitHub right now. Please try again in a moment.`
+      `We're having trouble connecting to GitHub right now. Please try again in a moment. (${error.message})`
     );
     friendlyError.statusCode = 500;
     friendlyError.userFriendly = true;
+    friendlyError.originalError = error.response?.data || error.message;
     throw friendlyError;
   }
 };

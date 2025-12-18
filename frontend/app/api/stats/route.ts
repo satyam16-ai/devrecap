@@ -98,22 +98,31 @@ export async function GET(request: NextRequest) {
         // Handle user-friendly errors
         if (error.userFriendly) {
             return NextResponse.json(
-                { error: error.message, debug: debugInfo },
+                {
+                    error: error.message,
+                    debug: debugInfo,
+                    originalError: error.originalError
+                },
                 { status: error.statusCode || 500 }
             );
         }
 
         // Generic fallback
         return NextResponse.json(
-            { error: 'Something went wrong while fetching your stats. Please try again later.', debug: debugInfo, details: error.message },
+            {
+                error: 'Something went wrong while fetching your stats. Please try again later.',
+                debug: debugInfo,
+                details: error.message,
+                originalError: error.originalError || error.response?.data
+            },
             { status: 500 }
         );
     }
 }
 
 async function handleGitHub(username: string, token?: string) {
-    // Get token from environment if not provided
-    const githubToken = token || process.env.GITHUB_TOKEN;
+    // Get token from environment if not provided, and trim any whitespace
+    const githubToken = (token || process.env.GITHUB_TOKEN || '').trim();
 
     console.log('Environment check:', {
         hasToken: !!token,
