@@ -106,7 +106,9 @@ export async function GET(request: NextRequest) {
 }
 
 async function handleGitHub(username: string, token?: string) {
-    const data = await fetchGitHubData(username, token);
+    // Get token from environment if not provided
+    const githubToken = token || process.env.GITHUB_TOKEN;
+    const data = await fetchGitHubData(username, githubToken);
 
     if (!data) {
         const error: any = new Error(`We couldn't find a GitHub user named "${username}". Please double-check the spelling and try again.`);

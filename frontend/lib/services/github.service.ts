@@ -3,15 +3,7 @@ import axios from 'axios';
 const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql';
 
 export const fetchGitHubData = async (username: string, token?: string) => {
-  const accessToken = token || process.env.GITHUB_TOKEN;
-
-  console.log('Token check:', {
-    hasProvidedToken: !!token,
-    hasEnvToken: !!process.env.GITHUB_TOKEN,
-    tokenLength: accessToken?.length || 0
-  });
-
-  if (!accessToken || accessToken === 'your_personal_access_token') {
+  if (!token) {
     const error: any = new Error(
       "GitHub token is missing. Please ensure GITHUB_TOKEN environment variable is set in Vercel."
     );
@@ -19,6 +11,8 @@ export const fetchGitHubData = async (username: string, token?: string) => {
     error.userFriendly = true;
     throw error;
   }
+
+  const accessToken = token;
 
   const query = `
     query($username: String!) {
