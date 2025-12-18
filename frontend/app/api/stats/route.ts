@@ -108,6 +108,14 @@ export async function GET(request: NextRequest) {
 async function handleGitHub(username: string, token?: string) {
     // Get token from environment if not provided
     const githubToken = token || process.env.GITHUB_TOKEN;
+
+    console.log('Environment check:', {
+        hasToken: !!token,
+        hasEnvToken: !!process.env.GITHUB_TOKEN,
+        envKeys: Object.keys(process.env).filter(k => k.includes('GITHUB')),
+        tokenLength: githubToken?.length || 0
+    });
+
     const data = await fetchGitHubData(username, githubToken);
 
     if (!data) {
