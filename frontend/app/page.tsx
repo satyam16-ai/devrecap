@@ -97,26 +97,14 @@ export default function Home() {
   useEffect(() => {
     const fetchLegends = async () => {
       try {
-        const promises = LEGEND_CONFIG.map(async (config) => {
-          try {
-            const response = await axios.get("/api/stats", {
-              params: { username: config.username, platform: 'github' }
-            });
-            // Merge actual data with our styling config
-            return {
-              ...response.data,
-              theme: config.theme,
-              font: config.font,
-              customImage: null
-            };
-          } catch (err) {
-            console.error(`Failed to fetch legend: ${config.username}`, err);
-            return null; // Skip failed ones
-          }
-        });
-
-        const results = await Promise.all(promises);
-        setLegendsData(results.filter(Boolean)); // Filter out nulls
+        const response = await axios.get("/api/hall-of-fame");
+        // Add font config locally since it's UI-specific
+        const legendsWithFonts = response.data.map((item: any) => ({
+          ...item,
+          font: "Inter",
+          customImage: null
+        }));
+        setLegendsData(legendsWithFonts);
       } catch (error) {
         console.error("Error fetching legends:", error);
       } finally {
