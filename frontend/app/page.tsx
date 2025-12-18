@@ -98,7 +98,7 @@ export default function Home() {
       try {
         const promises = LEGEND_CONFIG.map(async (config) => {
           try {
-            const response = await axios.get("http://localhost:5000/api/stats", {
+            const response = await axios.get("/api/stats", {
               params: { username: config.username, platform: 'github' }
             });
             // Merge actual data with our styling config
@@ -140,7 +140,7 @@ export default function Home() {
     }
 
     try {
-      const response = await axios.get("http://localhost:5000/api/stats", {
+      const response = await axios.get("/api/stats", {
         params: { username, platform }
       });
       // Attach platform to response data for preview mapping
