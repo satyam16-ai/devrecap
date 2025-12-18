@@ -89,17 +89,23 @@ export async function GET(request: NextRequest) {
     } catch (error: any) {
         console.error('Stats Error:', error.message || error);
 
+        const debugInfo = {
+            hasEnvToken: !!process.env.GITHUB_TOKEN,
+            envTokenLength: process.env.GITHUB_TOKEN?.length || 0,
+            nodeEnv: process.env.NODE_ENV
+        };
+
         // Handle user-friendly errors
         if (error.userFriendly) {
             return NextResponse.json(
-                { error: error.message },
+                { error: error.message, debug: debugInfo },
                 { status: error.statusCode || 500 }
             );
         }
 
         // Generic fallback
         return NextResponse.json(
-            { error: 'Something went wrong while fetching your stats. Please try again later.' },
+            { error: 'Something went wrong while fetching your stats. Please try again later.', debug: debugInfo, details: error.message },
             { status: 500 }
         );
     }
