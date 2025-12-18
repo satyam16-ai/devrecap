@@ -50,11 +50,12 @@ const THEMES = [
 ];
 
 const FONTS = [
-    { id: 'sans', name: 'Modern Sans', class: 'font-sans' },
-    { id: 'mono', name: 'Developer Mono', class: 'font-mono' },
+    { id: 'sans', name: 'Standard', class: 'font-sans' },
+    { id: 'outfit', name: 'Outfit', class: 'font-[family-name:var(--font-outfit)]' },
+    { id: 'space', name: 'Space Grotesk', class: 'font-[family-name:var(--font-space-grotesk)]' },
+    { id: 'fira', name: 'Fira Code', class: 'font-[family-name:var(--font-fira-code)]' },
+    { id: 'retro', name: 'Pixel Arcade', class: 'font-[family-name:var(--font-press-start-2p)]' },
     { id: 'serif', name: 'Classic Serif', class: 'font-serif' },
-    { id: 'system', name: 'System UI', class: 'font-[system-ui]' },
-    // We are relying on potential Google Fonts being available or falling back
 ];
 
 function DashboardContent() {
