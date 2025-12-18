@@ -3,12 +3,14 @@
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { Loader2, Calendar, TrendingUp, Zap, Trophy, Download, Settings2, Palette, Type, Upload, Flame, Star, Share2 } from "lucide-react";
+import { Loader2, Calendar, TrendingUp, Zap, Trophy, Download, Settings2, Palette, Type, Upload, Flame, Star, Share2, Instagram } from "lucide-react";
 import * as htmlToImage from 'html-to-image';
 import download from 'downloadjs';
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import ThreeDCard from "@/components/ThreeDCard";
+import RecapCard from "@/components/RecapCard";
+import DonationModal from "@/components/DonationModal";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
 
@@ -64,6 +66,8 @@ function DashboardContent() {
     const [platform, setPlatform] = useState('github');
     const [activeQuote, setActiveQuote] = useState(''); // Quote shown on card
     const [tempQuote, setTempQuote] = useState(''); // Quote in input
+    const [showDonationModal, setShowDonationModal] = useState(false);
+    const [exportFormat, setExportFormat] = useState<'card' | 'story'>('story');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,7 +106,18 @@ function DashboardContent() {
                 setStats(response.data);
             } catch (err: any) {
                 console.error(err);
-                setError(err.response?.data?.error || "Failed to load stats.");
+                let msg = "Something went wrong while fetching your data.";
+
+                if (err.response) {
+                    if (err.response.status === 404) {
+                        msg = "We couldn't find a profile with that username. Please check for typos!";
+                    } else if (err.response.status === 403 || err.response.status === 429) {
+                        msg = "GitHub's API is a bit busy right now (Rate Limit). Please wait a few minutes try again.";
+                    } else if (err.response.data?.error) {
+                        msg = err.response.data.error;
+                    }
+                }
+                setError(msg);
             } finally {
                 setLoading(false);
             }
@@ -112,15 +127,26 @@ function DashboardContent() {
     }, [searchParams, router]);
 
     const downloadCard = async () => {
-        const node = document.getElementById('preview-card-3d');
+        const targetId = exportFormat === 'story' ? 'story-export-card' : 'preview-card-3d';
+        const node = document.getElementById(targetId);
+
         if (node) {
             try {
-                const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3 });
+                // If story, use opaque (no bg option). If card, use transparency.
+                const options = exportFormat === 'card'
+                    ? { pixelRatio: 3, backgroundColor: null as any }
+                    : { pixelRatio: 3 };
+
+                const dataUrl = await htmlToImage.toPng(node, options);
                 download(dataUrl, `${stats?.username}-devrecap.png`);
             } catch (error) {
                 console.error('Download failed', error);
             }
         }
+    };
+
+    const handleDownloadClick = () => {
+        setShowDonationModal(true);
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,12 +161,17 @@ function DashboardContent() {
     };
 
     const handleShare = async () => {
-        const node = document.getElementById('preview-card-3d');
+        const targetId = exportFormat === 'story' ? 'story-export-card' : 'preview-card-3d';
+        const node = document.getElementById(targetId);
         if (!node) return;
 
         setLoading(true);
         try {
-            const blob = await htmlToImage.toBlob(node, { pixelRatio: 2 });
+            const options = exportFormat === 'card'
+                ? { pixelRatio: 2, backgroundColor: null as any }
+                : { pixelRatio: 2 };
+
+            const blob = await htmlToImage.toBlob(node, options);
             if (!blob) throw new Error("Failed to generate image");
 
             const file = new File([blob], `${stats?.username}-devrecap.png`, { type: 'image/png' });
@@ -163,13 +194,17 @@ function DashboardContent() {
         }
     };
 
-    const shareToPlatform = (platform: 'whatsapp' | 'twitter') => {
+    const shareToPlatform = (platform: 'whatsapp' | 'twitter' | 'instagram') => {
         const text = `Check out my Developer Recap! 🚀\n\nRank: ${stats?.rank}\nConsistency: ${stats?.consistencyScore}%\n\nCreate yours at: https://devrecap.site`;
 
         if (platform === 'whatsapp') {
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         } else if (platform === 'twitter') {
             window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+        } else if (platform === 'instagram') {
+            // Instagram doesn't support web sharing well, so we download image + open
+            downloadCard();
+            window.open('https://instagram.com', '_blank');
         }
     };
 
@@ -185,11 +220,19 @@ function DashboardContent() {
     );
 
     if (error) return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-            <div className="text-center">
-                <h2 className="text-2xl font-bold text-red-500">Error</h2>
-                <p className="text-slate-400 mb-4">{error}</p>
-                <button onClick={() => router.push('/')} className="text-blue-400 hover:underline">Go Home</button>
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-6">
+            <div className="text-center max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
+                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">🤔</span>
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Oops! Something's off.</h2>
+                <p className="text-slate-400 mb-6 leading-relaxed">{error}</p>
+                <button
+                    onClick={() => router.push('/')}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold transition-all w-full"
+                >
+                    Try Again
+                </button>
             </div>
         </div>
     );
@@ -230,7 +273,7 @@ function DashboardContent() {
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block flex items-center gap-2">
                     <Type className="w-4 h-4" /> Typography
                 </label>
-                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                     {FONTS.map(font => (
                         <button
                             key={font.id}
@@ -413,6 +456,39 @@ function DashboardContent() {
     // 3. Share Controls
     const ShareControls = () => (
         <div className="space-y-6">
+            {/* Format Toggle */}
+            <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">
+                    Export Format
+                </label>
+                <div className="bg-slate-900/50 p-1 rounded-xl border border-slate-800 flex relative">
+                    <button
+                        onClick={() => setExportFormat('card')}
+                        className={clsx(
+                            "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all z-10",
+                            exportFormat === 'card' ? "bg-slate-800 text-white shadow-md border border-slate-700" : "text-slate-500 hover:text-slate-300"
+                        )}
+                    >
+                        Transparent Card
+                    </button>
+                    <button
+                        onClick={() => setExportFormat('story')}
+                        className={clsx(
+                            "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all z-10",
+                            exportFormat === 'story' ? "bg-slate-800 text-white shadow-md border border-slate-700" : "text-slate-500 hover:text-slate-300"
+                        )}
+                    >
+                        Story Ready
+                    </button>
+                    <div
+                        className="absolute inset-y-1 bg-slate-800 rounded-lg transition-all duration-300 ease-spring"
+                        style={{
+                            width: 'calc(50% - 4px)',
+                            left: exportFormat === 'card' ? '4px' : 'calc(50%)'
+                        }}
+                    />
+                </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
                 <button
                     onClick={handleShare}
@@ -422,7 +498,7 @@ function DashboardContent() {
                     <span>Native Share</span>
                 </button>
                 <button
-                    onClick={downloadCard}
+                    onClick={handleDownloadClick}
                     className="py-4 bg-slate-800 active:bg-slate-700 text-white rounded-2xl font-bold flex flex-col items-center justify-center gap-2 scroll-m-0"
                 >
                     <Download className="w-6 h-6" />
@@ -440,6 +516,9 @@ function DashboardContent() {
                     </button>
                     <button onClick={() => shareToPlatform('twitter')} className="flex-1 py-3 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/20 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#1DA1F2]/20">
                         Twitter
+                    </button>
+                    <button onClick={() => shareToPlatform('instagram')} className="flex-1 py-3 bg-[#E1306C]/10 text-[#E1306C] border border-[#E1306C]/20 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#E1306C]/20">
+                        <Instagram className="w-4 h-4" />
                     </button>
                 </div>
             </div>
@@ -583,6 +662,55 @@ function DashboardContent() {
 
                 </div>
             </div>
+
+
+            {/* Hidden Story Export Container */}
+            {stats && (
+                <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+                    <div
+                        id="story-export-card"
+                        className={clsx(
+                            "w-[1080px] h-[1920px] flex items-center justify-center relative overflow-hidden",
+                            activeTheme.bg
+                        )}
+                    >
+                        {/* Background Elements */}
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay z-0" />
+                        <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px]" />
+                        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-black/20 rounded-full blur-[100px]" />
+
+                        {/* The Card - Scaled for high resolution */}
+                        <div className="scale-[2.2] transform z-10">
+                            <RecapCard
+                                stats={stats!}
+                                theme={activeTheme}
+                                font={activeFont}
+                                isPremium={isPremium}
+                                customImage={customImage}
+                                customQuote={activeQuote}
+                                platform={platform}
+                                options={{ showAvatar, showBio, showHeatmap, showStats, showBadges, qrType, activityType }}
+                                id="story-recap-internal"
+                            />
+                        </div>
+
+                        {/* Branding */}
+                        <div className="absolute bottom-32 flex flex-col items-center gap-2 z-20">
+                            <div className="px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2">
+                                <span className="text-white font-bold text-lg tracking-widest uppercase">DevRecap.site</span>
+                            </div>
+                            <span className="text-white/50 text-base font-medium">Create your developer story</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Donation Modal */}
+            <DonationModal
+                isOpen={showDonationModal}
+                onClose={() => setShowDonationModal(false)}
+                onDownload={downloadCard}
+            />
         </div>
     );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowRight, Zap, Trophy, Share2, Github, Code } from "lucide-react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThreeDCard from "@/components/ThreeDCard";
@@ -30,6 +30,36 @@ const LEGEND_CONFIG = [
   }
 ];
 
+// Animation Variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
+};
+
+const floatVariants: Variants = {
+  initial: { y: 0 },
+  animate: {
+    y: [-10, 10, -10],
+    transition: {
+      duration: 6,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+
 export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -40,6 +70,28 @@ export default function Home() {
   // Real Hall of Fame Data
   const [legendsData, setLegendsData] = useState<any[]>([]);
   const [legendsLoading, setLegendsLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = container.scrollWidth / (legendsData.length || 3);
+    const newIndex = Math.round(scrollLeft / itemWidth);
+    if (newIndex !== activeIndex) {
+      setActiveIndex(newIndex);
+    }
+  };
+
+  const scrollToIndex = (index: number) => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const itemWidth = container.scrollWidth / (legendsData.length || 3);
+    container.scrollTo({
+      left: index * itemWidth,
+      behavior: 'smooth'
+    });
+  };
 
   useEffect(() => {
     const fetchLegends = async () => {
@@ -108,100 +160,111 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-[family-name:var(--font-geist-sans)] selection:bg-purple-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 text-white font-[family-name:var(--font-geist-sans)] selection:bg-purple-500/30 overflow-x-hidden relative">
       <Navbar />
 
+      {/* Animated Background Gradients */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '7s' }}></div>
+      </div>
+
       {/* Hero Section */}
-      <main className="pt-24 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center relative gap-8 lg:gap-12">
-        {/* Ambient Background */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] -z-10 opacity-50 pointer-events-none"></div>
+      <main className="pt-28 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center relative gap-8 lg:gap-12">
 
         <div className="flex flex-col lg:flex-row items-center gap-12 w-full">
           {/* Left Column: Content */}
-          <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left z-10">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left z-10"
+          >
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center gap-2 px-3 py-1 bg-slate-900/50 border border-slate-700/50 rounded-full text-sm text-slate-300 mb-6 backdrop-blur-sm self-center lg:self-start"
+              variants={itemVariants}
+              className="flex items-center gap-2 px-3 py-1 bg-slate-900/50 border border-slate-700/50 rounded-full text-sm text-slate-300 mb-6 backdrop-blur-sm self-center lg:self-start hover:border-blue-500/50 transition-colors cursor-default"
             >
-              <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
               <span>v2.0 Now Available</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              variants={itemVariants}
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6"
             >
               <span className="bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
                 Your Dev Story,
               </span>
               <br />
-              <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient_4s_ease_infinite]">
                 Summarized.
               </span>
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              variants={itemVariants}
               className="text-xl text-slate-400 max-w-2xl mb-8 leading-relaxed"
             >
               Stop sharing boring GitHub links. Generate a
-              <span className="text-white font-semibold"> professional developer card </span>
+              <span className="text-white font-semibold relative inline-block mx-1">
+                professional developer card
+                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-blue-500/50"></span>
+              </span>
               with your stats, achievements, and coding personality.
             </motion.p>
 
             {/* Input Form */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              variants={itemVariants}
               className="w-full max-w-md relative group z-10"
             >
               {/* Platform Switcher */}
-              <div className="flex justify-center mb-6">
-                <div className="bg-slate-900/50 p-1 rounded-full border border-slate-800 flex relative">
+              <div className="flex justify-center mb-6 relative z-20">
+                <div className="bg-slate-900/80 p-1.5 rounded-full border border-slate-800 flex relative backdrop-blur-md shadow-inner">
                   <motion.div
-                    className="absolute top-1 bottom-1 bg-slate-700/50 rounded-full"
+                    className="absolute top-1.5 bottom-1.5 bg-slate-700 rounded-full shadow-md"
                     initial={false}
                     animate={{
-                      left: platform === 'github' ? '4px' : '50%',
-                      width: 'calc(50% - 4px)'
+                      left: platform === 'github' ? '6px' : '50%',
+                      width: 'calc(50% - 6px)',
+                      x: platform === 'github' ? 0 : 0
                     }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                   <button
+                    type="button"
                     onClick={() => setPlatform('github')}
-                    className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors ${platform === 'github' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`relative z-10 px-8 py-2 rounded-full text-sm font-bold transition-colors duration-300 ${platform === 'github' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
                   >
                     GitHub
                   </button>
                   <button
+                    type="button"
                     onClick={() => setPlatform('leetcode')}
-                    className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors ${platform === 'leetcode' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`relative z-10 px-8 py-2 rounded-full text-sm font-bold transition-colors duration-300 ${platform === 'leetcode' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
                   >
                     LeetCode
                   </button>
                 </div>
               </div>
 
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-                <div className="relative flex bg-slate-950 rounded-full p-2 border border-slate-800 shadow-2xl">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-500 group-hover:duration-200 pointer-events-none"></div>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full relative">
+                <div className="relative flex bg-slate-950 rounded-full p-2 border border-slate-800 shadow-2xl transition-all focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/20">
                   {platform === 'github' ? (
-                    <Github className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                    <Github className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                   ) : (
-                    <Code className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-500 w-5 h-5" />
+                    <Code className="absolute left-6 top-1/2 -translate-y-1/2 text-orange-500 w-5 h-5" />
                   )}
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder={`${platform === 'github' ? 'GitHub' : 'LeetCode'} Username`}
-                    className="flex-1 bg-transparent border-none outline-none pl-12 pr-6 text-white placeholder-slate-600 font-medium h-12"
+                    className="flex-1 bg-transparent border-none outline-none pl-14 pr-6 text-white placeholder-slate-500 font-medium h-12"
                   />
                 </div>
 
@@ -210,9 +273,9 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="relative rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-[1px] h-14 w-full mt-4 overflow-hidden group shadow-lg shadow-purple-500/25"
+                  className="relative rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-[1px] h-14 w-full mt-2 overflow-hidden group shadow-lg shadow-purple-500/20"
                 >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2E8F0_0%,#312E81_50%,#E2E8F0_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform"></div>
                   <div className="relative h-full w-full bg-slate-950 rounded-full flex items-center justify-center gap-2 group-hover:bg-slate-900 transition-colors duration-300">
                     {loading ? (
                       <Loader2 className="animate-spin w-5 h-5 text-white" />
@@ -226,34 +289,60 @@ export default function Home() {
                 </motion.button>
               </form>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Right Column: 3D Card */}
-          <div className="flex-1 w-full flex justify-center lg:justify-end hidden md:flex z-0 pointer-events-auto relative">
-            <div className="scale-[0.65] lg:scale-[0.85] origin-top md:origin-center lg:origin-top-right transition-transform duration-500">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={itemVariants}
+            className="flex-1 w-full flex justify-center lg:justify-end hidden md:flex z-0 pointer-events-auto relative perspective-[2000px]"
+          >
+            <motion.div
+              variants={floatVariants}
+              initial="initial"
+              animate="animate"
+              className="scale-[0.65] lg:scale-[0.85] origin-top md:origin-center lg:origin-top-right relative z-10"
+            >
+              {/* 3D Card Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-purple-500 blur-[100px] opacity-20 -z-10 rounded-full"></div>
               <ThreeDCard stats={previewStats} onEdit={handleEdit} />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* LEGENDS SECTION */}
-        <div id="hall-of-fame" className="w-full mt-24 mb-12 relative scroll-mt-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent mb-4">
+        <div id="hall-of-fame" className="w-full mt-32 mb-12 relative scroll-mt-24">
+          <div className="text-center mb-8">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl font-black bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent mb-4"
+            >
               Hall of Fame
-            </h2>
-            <p className="text-slate-400 max-w-xl mx-auto">
-              See how the legends of open source look on DevRecap. unique styles for unique minds.
-            </p>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-slate-400 max-w-xl mx-auto"
+            >
+              See how the legends of open source look on DevRecap. Unique styles for unique minds.
+            </motion.p>
           </div>
 
-          {/* Static Hall of Fame Grid */}
-          <div className="w-full flex justify-center px-4 pb-20 pt-4">
-            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full max-w-7xl">
+          <div className="w-full flex justify-center px-0 md:px-4 pb-20 pt-0">
+            <div
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory items-center justify-start gap-6 md:gap-12 w-full max-w-7xl no-scrollbar px-8 md:px-0 py-24 md:py-12 min-h-[450px] md:min-h-[550px]"
+            >
               {legendsLoading ? (
                 // Loading Skeletons
                 [1, 2, 3].map((_, i) => (
-                  <div key={i} className="animate-pulse" style={{ zoom: 0.65 }}>
+                  <div key={i} className="animate-pulse opacity-50 shrink-0 snap-center scale-[0.6] md:scale-[0.65]">
                     <div className="w-[450px] h-[600px] bg-slate-900 rounded-[2rem] border border-slate-800" />
                   </div>
                 ))
@@ -261,19 +350,14 @@ export default function Home() {
                 legendsData.map((legend, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="relative group"
+                    initial={{ opacity: 0, y: 50, rotateX: 10 }}
+                    whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ delay: i * 0.15, type: "spring", damping: 20 }}
+                    className="relative group shrink-0 snap-center"
                   >
-                    {/* 
-                        Using zoom: 0.65 for sharp rendering on Windows screens.
-                        The wrapper ensures the layout respects the zoomed size.
-                    */}
                     <div
-                      className="relative cursor-pointer transition-transform duration-500 hover:-translate-y-2"
-                      style={{ zoom: 0.65 }}
+                      className="relative cursor-pointer transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] scale-[0.6] md:scale-[0.65]"
                     >
                       <ThreeDCard
                         stats={legend as any}
@@ -291,6 +375,23 @@ export default function Home() {
               )}
             </div>
           </div>
+
+          {/* Dots Navigation */}
+          {!legendsLoading && legendsData.length > 1 && (
+            <div className="flex justify-center gap-3 mt-4">
+              {legendsData.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => scrollToIndex(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${activeIndex === i
+                    ? "w-8 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                    : "w-2 bg-slate-700 hover:bg-slate-600"
+                    }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Feature Grid */}
@@ -306,13 +407,14 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.2 }}
-              className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition duration-300"
+              whileHover={{ y: -5, backgroundColor: "rgba(30, 41, 59, 0.8)" }}
+              className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 backdrop-blur-sm transition-all duration-300 group"
             >
-              <div className="mb-4 bg-slate-800 w-12 h-12 rounded-xl flex items-center justify-center border border-slate-700">
+              <div className="mb-4 bg-slate-800 w-12 h-12 rounded-xl flex items-center justify-center border border-slate-700 group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-slate-400 leading-relaxed">{feature.desc}</p>
+              <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">{feature.desc}</p>
             </motion.div>
           ))}
         </div>

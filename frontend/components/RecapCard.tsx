@@ -304,9 +304,12 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 <div className="flex justify-between items-end border-t border-white/5 pt-3 mt-auto">
                     <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-medium text-slate-600">Generated on {new Date().getFullYear()}</span>
-                        <span className={clsx("flex items-center gap-1 font-bold text-[10px]", isPremium ? "text-yellow-500" : theme.accent)}>
-                            {isPremium ? "Verified Pro Member" : "DevRecap.site"}
-                        </span>
+                        <span className={clsx("font-bold text-[10px]", theme.accent)}>DevRecap.site</span>
+                        {isPremium && (
+                            <span className="text-[9px] font-bold text-yellow-500 uppercase tracking-wider flex items-center gap-1">
+                                Verified Pro
+                            </span>
+                        )}
                     </div>
 
                     <div className="bg-white p-1 rounded-md">
