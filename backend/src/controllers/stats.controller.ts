@@ -20,8 +20,20 @@ export const getStats = async (req: Request, res: Response) => {
             await handleGithub(targetUsername, token, res);
         }
     } catch (error: any) {
-        console.error('Stats Error:', error);
-        res.status(500).json({ error: 'Failed to fetch stats', details: error.message });
+        console.error('Stats Error:', error.message || error);
+
+        // Handle user-friendly errors with proper status codes
+        if (error.userFriendly) {
+            res.status(error.statusCode || 500).json({
+                error: error.message
+            });
+            return;
+        }
+
+        // Generic fallback for unexpected errors
+        res.status(500).json({
+            error: 'Something went wrong while fetching your stats. Please try again later.'
+        });
     }
 };
 
@@ -29,8 +41,12 @@ const handleLeetCode = async (username: string, res: Response) => {
     const data = await fetchLeetCodeData(username);
 
     if (!data) {
-        res.status(404).json({ error: 'LeetCode user not found' });
-        return;
+        const error: any = new Error(
+            `We couldn't find a LeetCode user named "${username}". Please double-check the spelling and try again.`
+        );
+        error.statusCode = 404;
+        error.userFriendly = true;
+        throw error;
     }
 
     // Process LeetCode Data
@@ -162,6 +178,18 @@ const handleGithub = async (targetUsername: string, token: string | undefined, r
 
     // Process Data
     const calendar = data.contributionsCollection.contributionCalendar;
+
+    // Check for empty activity
+    if (calendar.totalContributions === 0) {
+        const error: any = new Error(
+            `No GitHub activity found for ${targetUsername} this year. ` +
+            `Try making some commits or contributions, then come back to create your recap! 🚀`
+        );
+        error.statusCode = 404;
+        error.userFriendly = true;
+        throw error;
+    }
+
     const weeks = calendar.weeks;
     let activeDays = 0;
     let totalDays = 0;

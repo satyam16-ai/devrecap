@@ -99,25 +99,14 @@ function DashboardContent() {
             try {
                 setLoading(true);
                 const authToken = token || localStorage.getItem("devrecap_token");
-                const response = await axios.get("http://localhost:5000/api/stats", {
+                const response = await axios.get("/api/stats", {
                     params: { username, platform: urlPlatform || 'github' },
                     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
                 });
                 setStats(response.data);
             } catch (err: any) {
                 console.error(err);
-                let msg = "Something went wrong while fetching your data.";
-
-                if (err.response) {
-                    if (err.response.status === 404) {
-                        msg = "We couldn't find a profile with that username. Please check for typos!";
-                    } else if (err.response.status === 403 || err.response.status === 429) {
-                        msg = "GitHub's API is a bit busy right now (Rate Limit). Please wait a few minutes try again.";
-                    } else if (err.response.data?.error) {
-                        msg = err.response.data.error;
-                    }
-                }
-                setError(msg);
+                setError(err.response?.data?.error || "Failed to load stats.");
             } finally {
                 setLoading(false);
             }
@@ -220,20 +209,36 @@ function DashboardContent() {
     );
 
     if (error) return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-6">
-            <div className="text-center max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
-                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">🤔</span>
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white p-6">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-md w-full"
+            >
+                <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 text-center">
+                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-3">Oops!</h2>
+                    <p className="text-slate-300 mb-6 leading-relaxed">{error}</p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold transition-colors"
+                        >
+                            Try Again
+                        </button>
+                        <button
+                            onClick={() => router.push('/')}
+                            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors"
+                        >
+                            Go Home
+                        </button>
+                    </div>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Oops! Something's off.</h2>
-                <p className="text-slate-400 mb-6 leading-relaxed">{error}</p>
-                <button
-                    onClick={() => router.push('/')}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold transition-all w-full"
-                >
-                    Try Again
-                </button>
-            </div>
+            </motion.div>
         </div>
     );
 
