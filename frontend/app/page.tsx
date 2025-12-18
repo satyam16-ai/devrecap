@@ -1,19 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowRight, Zap, Trophy, Share2, Github } from "lucide-react";
+import { Loader2, ArrowRight, Zap, Trophy, Share2, Github, Code } from "lucide-react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThreeDCard from "@/components/ThreeDCard";
 
+import { THEMES, FONTS } from "@/lib/constants";
+
+// Configuration for whom to fetch and how to style them
+const LEGEND_CONFIG = [
+  {
+    username: "torvalds",
+    theme: THEMES[10], // Matrix
+    font: FONTS[3], // Fira Code
+  },
+  {
+    username: "gaearon",
+    theme: THEMES[9], // Cotton Candy
+    font: FONTS[0], // Sans
+  },
+  {
+    username: "gvanrossum",
+    theme: THEMES[3], // Forest
+    font: FONTS[2], // Space Grotesk
+  }
+];
+
 export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [platform, setPlatform] = useState<'github' | 'leetcode'>('github');
   const [loading, setLoading] = useState(false);
   const [previewStats, setPreviewStats] = useState(null);
+
+  // Real Hall of Fame Data
+  const [legendsData, setLegendsData] = useState<any[]>([]);
+  const [legendsLoading, setLegendsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLegends = async () => {
+      try {
+        const promises = LEGEND_CONFIG.map(async (config) => {
+          try {
+            const response = await axios.get("http://localhost:5000/api/stats", {
+              params: { username: config.username, platform: 'github' }
+            });
+            // Merge actual data with our styling config
+            return {
+              ...response.data,
+              theme: config.theme,
+              font: config.font,
+              customImage: null
+            };
+          } catch (err) {
+            console.error(`Failed to fetch legend: ${config.username}`, err);
+            return null; // Skip failed ones
+          }
+        });
+
+        const results = await Promise.all(promises);
+        setLegendsData(results.filter(Boolean)); // Filter out nulls
+      } catch (error) {
+        console.error("Error fetching legends:", error);
+      } finally {
+        setLegendsLoading(false);
+      }
+    };
+
+    fetchLegends();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,15 +83,16 @@ export default function Home() {
     const isMobile = window.innerWidth < 768; // standard md breakpoint
 
     if (isMobile) {
-      router.push(`/dashboard?username=${username}`);
+      router.push(`/dashboard?username=${username}&platform=${platform}`);
       return;
     }
 
     try {
       const response = await axios.get("http://localhost:5000/api/stats", {
-        params: { username }
+        params: { username, platform }
       });
-      setPreviewStats(response.data);
+      // Attach platform to response data for preview mapping
+      setPreviewStats({ ...response.data, platform });
     } catch (err) {
       console.error(err);
       alert("User not found or error fetching stats.");
@@ -43,7 +103,7 @@ export default function Home() {
 
   const handleEdit = () => {
     if (username) {
-      router.push(`/dashboard?username=${username}`);
+      router.push(`/dashboard?username=${username}&platform=${platform}`);
     }
   };
 
@@ -102,15 +162,45 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="w-full max-w-md relative group z-10"
             >
+              {/* Platform Switcher */}
+              <div className="flex justify-center mb-6">
+                <div className="bg-slate-900/50 p-1 rounded-full border border-slate-800 flex relative">
+                  <motion.div
+                    className="absolute top-1 bottom-1 bg-slate-700/50 rounded-full"
+                    initial={false}
+                    animate={{
+                      left: platform === 'github' ? '4px' : '50%',
+                      width: 'calc(50% - 4px)'
+                    }}
+                  />
+                  <button
+                    onClick={() => setPlatform('github')}
+                    className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors ${platform === 'github' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    GitHub
+                  </button>
+                  <button
+                    onClick={() => setPlatform('leetcode')}
+                    className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors ${platform === 'leetcode' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    LeetCode
+                  </button>
+                </div>
+              </div>
+
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
                 <div className="relative flex bg-slate-950 rounded-full p-2 border border-slate-800 shadow-2xl">
-                  <Github className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                  {platform === 'github' ? (
+                    <Github className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                  ) : (
+                    <Code className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-500 w-5 h-5" />
+                  )}
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="GitHub Username (Required)"
+                    placeholder={`${platform === 'github' ? 'GitHub' : 'LeetCode'} Username`}
                     className="flex-1 bg-transparent border-none outline-none pl-12 pr-6 text-white placeholder-slate-600 font-medium h-12"
                   />
                 </div>
@@ -142,6 +232,63 @@ export default function Home() {
           <div className="flex-1 w-full flex justify-center lg:justify-end hidden md:flex z-0 pointer-events-auto relative">
             <div className="scale-[0.65] lg:scale-[0.85] origin-top md:origin-center lg:origin-top-right transition-transform duration-500">
               <ThreeDCard stats={previewStats} onEdit={handleEdit} />
+            </div>
+          </div>
+        </div>
+
+        {/* LEGENDS SECTION */}
+        <div id="hall-of-fame" className="w-full mt-24 mb-12 relative scroll-mt-24">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent mb-4">
+              Hall of Fame
+            </h2>
+            <p className="text-slate-400 max-w-xl mx-auto">
+              See how the legends of open source look on DevRecap. unique styles for unique minds.
+            </p>
+          </div>
+
+          {/* Static Hall of Fame Grid */}
+          <div className="w-full flex justify-center px-4 pb-20 pt-4">
+            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full max-w-7xl">
+              {legendsLoading ? (
+                // Loading Skeletons
+                [1, 2, 3].map((_, i) => (
+                  <div key={i} className="animate-pulse" style={{ zoom: 0.65 }}>
+                    <div className="w-[450px] h-[600px] bg-slate-900 rounded-[2rem] border border-slate-800" />
+                  </div>
+                ))
+              ) : (
+                legendsData.map((legend, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="relative group"
+                  >
+                    {/* 
+                        Using zoom: 0.65 for sharp rendering on Windows screens.
+                        The wrapper ensures the layout respects the zoomed size.
+                    */}
+                    <div
+                      className="relative cursor-pointer transition-transform duration-500 hover:-translate-y-2"
+                      style={{ zoom: 0.65 }}
+                    >
+                      <ThreeDCard
+                        stats={legend as any}
+                        theme={legend.theme}
+                        font={legend.font}
+                        isPremium={true}
+                        customImage={null}
+                        options={{
+                          showAvatar: true, showBio: true, showHeatmap: true, showStats: true, showBadges: true, qrType: 'github', activityType: 'heatmap'
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
         </div>

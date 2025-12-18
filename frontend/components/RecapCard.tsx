@@ -1,4 +1,4 @@
-import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2 } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code } from "lucide-react";
 import clsx from "clsx";
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -29,6 +29,8 @@ interface RecapCardProps {
     font: any;
     isPremium: boolean;
     customImage: string | null;
+    customQuote?: string; // New Prop
+    platform?: string; // New Prop
     id?: string;
     options?: {
         showAvatar: boolean;
@@ -41,11 +43,17 @@ interface RecapCardProps {
     };
 }
 
-export default function RecapCard({ stats, theme, font, isPremium, customImage, id = "recap-card",
+export default function RecapCard({ stats, theme, font, isPremium, customImage, customQuote = "", platform = "github", id = "recap-card",
     options = { showAvatar: true, showBio: true, showHeatmap: true, showStats: true, showBadges: true, qrType: 'github', activityType: 'heatmap' }
 }: RecapCardProps) {
 
-    const qrUrl = options.qrType === 'app' ? 'https://devrecap.site' : `https://github.com/${stats.username}`;
+    // Correct QR URL based on platform if qrType is 'github' (which means profile)
+    const getProfileUrl = () => {
+        if (platform === 'leetcode') return `https://leetcode.com/${stats.username}`;
+        return `https://github.com/${stats.username}`;
+    };
+
+    const qrUrl = options.qrType === 'app' ? 'https://devrecap.site' : getProfileUrl();
 
     return (
         <div
@@ -74,10 +82,19 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             {/* Content Container */}
             <div className="relative z-20 h-full flex flex-col gap-6">
 
+                {/* Platform Logo Watermark */}
+                <div className="absolute top-0 right-0 p-2 opacity-50">
+                    {platform === 'leetcode' ? (
+                        <Code className="w-6 h-6 text-orange-400" />
+                    ) : (
+                        <Github className="w-6 h-6 text-slate-400" />
+                    )}
+                </div>
+
                 {/* 1. Header & Identity */}
                 <div className="flex flex-col items-center text-center">
                     <span className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/5 text-[10px] uppercase font-bold tracking-widest text-white/70">
-                        GitHub Recap 2025
+                        {platform === 'leetcode' ? 'LeetCode Recap 2025' : 'GitHub Recap 2025'}
                     </span>
                     {options.showAvatar && (
                         <div className={clsx(
@@ -107,6 +124,13 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                             <p className="text-xs text-slate-300 font-medium leading-relaxed">
                                 "{stats.smartBio}"
                             </p>
+                        </div>
+                    )}
+
+                    {/* Custom Quote - New Feature */}
+                    {customQuote && (
+                        <div className="mt-2 text-center max-w-xs">
+                            <p className={clsx("text-sm italic font-serif opacity-90", theme.text)}>“{customQuote}”</p>
                         </div>
                     )}
                 </div>
@@ -235,7 +259,8 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" /> Total Commits
+                                <Calendar className="w-3 h-3" />
+                                {platform === 'leetcode' ? 'Problems Solved' : 'Total Commits'}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
                         </div>

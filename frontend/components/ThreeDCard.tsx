@@ -12,6 +12,8 @@ interface ThreeDCardProps {
     font?: any;
     isPremium?: boolean;
     customImage?: string | null;
+    customQuote?: string;
+    platform?: string;
     options?: {
         showAvatar: boolean;
         showBio: boolean;
@@ -26,7 +28,7 @@ interface ThreeDCardProps {
 const DEFAULT_THEME = { id: 'midnight', name: 'Midnight', bg: 'bg-gradient-to-br from-slate-900 to-slate-950', border: 'border-slate-800', text: 'text-slate-200', accent: 'text-blue-400', cell: 'bg-blue-500' };
 const DEFAULT_FONT = { id: 'sans', name: 'Modern Sans', class: 'font-sans' };
 
-export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font = DEFAULT_FONT, isPremium = false, customImage = null, options }: ThreeDCardProps) {
+export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font = DEFAULT_FONT, isPremium = false, customImage = null, customQuote = "", platform = "github", options }: ThreeDCardProps) {
     const ref = useRef<HTMLDivElement>(null);
 
     // Mouse position state
@@ -101,6 +103,8 @@ export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font 
                                 font={font}
                                 isPremium={isPremium}
                                 customImage={customImage}
+                                customQuote={customQuote}
+                                platform={platform}
                                 id="preview-card-3d"
                                 options={options}
                             />

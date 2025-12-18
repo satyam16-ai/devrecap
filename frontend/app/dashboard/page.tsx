@@ -34,29 +34,7 @@ interface Stats {
 }
 
 // --- Constants ---
-const THEMES = [
-    { id: 'midnight', name: 'Midnight', bg: 'bg-gradient-to-br from-slate-900 to-slate-950', border: 'border-slate-800', text: 'text-slate-200', accent: 'text-blue-400', cell: 'bg-blue-500' },
-    { id: 'sunset', name: 'Sunset', bg: 'bg-gradient-to-br from-orange-950 to-slate-900', border: 'border-orange-500/30', text: 'text-orange-100', accent: 'text-orange-400', cell: 'bg-orange-500' },
-    { id: 'cyberpunk', name: 'Cyberpunk', bg: 'bg-gradient-to-br from-fuchsia-950 to-purple-950', border: 'border-fuchsia-500/30', text: 'text-fuchsia-100', accent: 'text-fuchsia-400', cell: 'bg-fuchsia-500' },
-    { id: 'forest', name: 'Forest', bg: 'bg-gradient-to-br from-emerald-950 to-green-950', border: 'border-emerald-500/30', text: 'text-emerald-100', accent: 'text-emerald-400', cell: 'bg-emerald-500' },
-    { id: 'crimson', name: 'Crimson', bg: 'bg-gradient-to-br from-red-950 to-slate-950', border: 'border-red-500/30', text: 'text-red-100', accent: 'text-red-400', cell: 'bg-red-500' },
-    { id: 'aurora', name: 'Aurora', bg: 'bg-gradient-to-br from-teal-950 to-slate-900', border: 'border-teal-500/30', text: 'text-teal-100', accent: 'text-teal-400', cell: 'bg-teal-500' },
-    { id: 'golden', name: 'Golden Hour', bg: 'bg-gradient-to-br from-yellow-950 to-amber-950', border: 'border-yellow-500/30', text: 'text-yellow-100', accent: 'text-yellow-400', cell: 'bg-yellow-500' },
-    { id: 'ice', name: 'Glacier', bg: 'bg-gradient-to-br from-cyan-950 to-blue-950', border: 'border-cyan-500/30', text: 'text-cyan-100', accent: 'text-cyan-400', cell: 'bg-cyan-500' },
-    { id: 'lavender', name: 'Lavender', bg: 'bg-gradient-to-br from-violet-950 to-slate-900', border: 'border-violet-500/30', text: 'text-violet-100', accent: 'text-violet-400', cell: 'bg-violet-500' },
-    { id: 'cotton_candy', name: 'Cotton Candy', bg: 'bg-gradient-to-br from-pink-300 to-purple-300', border: 'border-pink-200', text: 'text-pink-900', accent: 'text-purple-600', cell: 'bg-pink-500' },
-    { id: 'matrix', name: 'The Matrix', bg: 'bg-black', border: 'border-green-500', text: 'text-green-400', accent: 'text-green-500', cell: 'bg-green-600' },
-    { id: 'dracula', name: 'Vampire', bg: 'bg-gradient-to-br from-gray-900 to-red-950', border: 'border-red-900', text: 'text-gray-100', accent: 'text-red-500', cell: 'bg-red-600' },
-];
-
-const FONTS = [
-    { id: 'sans', name: 'Standard', class: 'font-sans' },
-    { id: 'outfit', name: 'Outfit', class: 'font-[family-name:var(--font-outfit)]' },
-    { id: 'space', name: 'Space Grotesk', class: 'font-[family-name:var(--font-space-grotesk)]' },
-    { id: 'fira', name: 'Fira Code', class: 'font-[family-name:var(--font-fira-code)]' },
-    { id: 'retro', name: 'Pixel Arcade', class: 'font-[family-name:var(--font-press-start-2p)]' },
-    { id: 'serif', name: 'Classic Serif', class: 'font-serif' },
-];
+import { THEMES, FONTS } from "@/lib/constants";
 
 function DashboardContent() {
     const router = useRouter();
@@ -82,6 +60,11 @@ function DashboardContent() {
     const [previewScale, setPreviewScale] = useState(0.85);
     const [mobileTab, setMobileTab] = useState<'design' | 'content' | 'share'>('design');
 
+    // New State for Multi-Platform
+    const [platform, setPlatform] = useState('github');
+    const [activeQuote, setActiveQuote] = useState(''); // Quote shown on card
+    const [tempQuote, setTempQuote] = useState(''); // Quote in input
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // ... (rest of code)
@@ -90,11 +73,14 @@ function DashboardContent() {
     useEffect(() => {
         let username = searchParams.get("username");
         const token = searchParams.get("token");
+        const urlPlatform = searchParams.get("platform");
+
+        if (urlPlatform) setPlatform(urlPlatform);
 
         if (token && username) {
             localStorage.setItem("devrecap_token", token);
             localStorage.setItem("devrecap_username", username);
-            window.history.replaceState({}, '', `/dashboard?username=${username}`);
+            window.history.replaceState({}, '', `/dashboard?username=${username}&platform=${urlPlatform || 'github'}`);
         } else if (!username) {
             const savedUsername = localStorage.getItem("devrecap_username");
             if (savedUsername) {
@@ -110,7 +96,7 @@ function DashboardContent() {
                 setLoading(true);
                 const authToken = token || localStorage.getItem("devrecap_token");
                 const response = await axios.get("http://localhost:5000/api/stats", {
-                    params: { username },
+                    params: { username, platform: urlPlatform || 'github' },
                     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
                 });
                 setStats(response.data);
@@ -382,7 +368,9 @@ function DashboardContent() {
                                 "px-3 py-1.5 text-xs rounded-md transition-all",
                                 qrType === 'github' ? "bg-blue-600 text-white shadow-md" : "text-slate-400 hover:text-white"
                             )}
-                        >My Profile</button>
+                        >
+                            {platform === 'leetcode' ? 'LeetCode' : 'GitHub'}
+                        </button>
                         <button
                             onClick={() => setQrType('app')}
                             className={clsx(
@@ -390,6 +378,32 @@ function DashboardContent() {
                                 qrType === 'app' ? "bg-blue-600 text-white shadow-md" : "text-slate-400 hover:text-white"
                             )}
                         >DevRecap</button>
+                    </div>
+                </div>
+
+                {/* Custom Quote Input */}
+                <div className="mt-4 pt-4 border-t border-slate-800">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">
+                        Custom Quote
+                    </label>
+                    <div className="flex flex-col gap-2">
+                        <textarea
+                            value={tempQuote}
+                            onChange={(e) => setTempQuote(e.target.value)}
+                            placeholder="Add a favorite quote..."
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-600 focus:border-blue-500 outline-none resize-none"
+                            rows={3}
+                            maxLength={100}
+                        />
+                        <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500">{tempQuote.length}/100</span>
+                            <button
+                                onClick={() => setActiveQuote(tempQuote)}
+                                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors"
+                            >
+                                Update Quote
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -473,6 +487,8 @@ function DashboardContent() {
                                 font={activeFont}
                                 isPremium={isPremium}
                                 customImage={customImage}
+                                customQuote={activeQuote}
+                                platform={platform}
                                 options={{
                                     showAvatar,
                                     showBio,
@@ -526,16 +542,16 @@ function DashboardContent() {
 
                         {/* Mobile: Conditional Rendering based on Tab */}
                         <div className="lg:hidden">
-                            {mobileTab === 'design' && <DesignControls />}
-                            {mobileTab === 'content' && <ContentControls />}
-                            {mobileTab === 'share' && <ShareControls />}
+                            {mobileTab === 'design' && DesignControls()}
+                            {mobileTab === 'content' && ContentControls()}
+                            {mobileTab === 'share' && ShareControls()}
                         </div>
 
                         {/* Desktop: Show All */}
                         <div className="hidden lg:block space-y-8">
-                            <DesignControls />
-                            <ContentControls />
-                            <ShareControls />
+                            {DesignControls()}
+                            {ContentControls()}
+                            {ShareControls()}
                         </div>
 
                     </div>
