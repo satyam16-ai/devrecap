@@ -20,6 +20,7 @@ export default function Navbar() {
                 <Link href="#features" className="text-sm text-slate-400 hover:text-white transition hidden md:block">Features</Link>
                 <Link href="#hall-of-fame" className="text-sm text-slate-400 hover:text-white transition hidden md:block">Hall of Fame</Link>
                 <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white transition hidden md:block">Dashboard</Link>
+                <Link href="#report-issue" className="text-sm text-slate-400 hover:text-white transition hidden md:block">Report Issue</Link>
 
                 <div className="flex items-center gap-3">
                     <Link

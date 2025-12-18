@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowRight, Zap, Trophy, Share2, Github, Code } from "lucide-react";
+import { Loader2, ArrowRight, Zap, Trophy, Share2, Github, Code, AlertCircle, Mail, CheckCircle } from "lucide-react";
+import Link from "next/link";
 import axios from "axios";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -418,6 +419,73 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
+
+        {/* Report an Issue Section */}
+        <motion.div
+          id="report-issue"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-24 w-full scroll-mt-24"
+        >
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500/10 via-orange-500/10 to-yellow-500/10 border border-red-500/20 p-12">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(239,68,68,0.1),transparent_50%)]" />
+
+            <div className="relative z-10 max-w-3xl mx-auto text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/30 mb-6"
+              >
+                <AlertCircle className="w-8 h-8 text-red-400" />
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Found a Bug?
+              </h2>
+              <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+                Help us improve DevRecap! Report issues, suggest features, or contribute to making this tool better for everyone.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="https://github.com/yourusername/devrecap/issues/new"
+                  target="_blank"
+                  className="group flex items-center gap-3 bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+                >
+                  <Github className="w-5 h-5" />
+                  <span>Report on GitHub</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+
+                <Link
+                  href="mailto:support@devrecap.site"
+                  className="group flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 border border-slate-700"
+                >
+                  <Mail className="w-5 h-5" />
+                  <span>Email Us</span>
+                </Link>
+              </div>
+
+              <div className="mt-8 flex items-center justify-center gap-8 text-sm text-slate-400">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Quick Response</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Open Source</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Community Driven</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </main>
 
       <Footer />

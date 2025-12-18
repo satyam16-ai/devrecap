@@ -36,6 +36,10 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "DevRecap.site - Your GitHub Year in Review",
   description: "Transform your GitHub activity into stunning visual recaps. Showcase your coding journey, consistency, and achievements with beautiful shareable cards.",
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
