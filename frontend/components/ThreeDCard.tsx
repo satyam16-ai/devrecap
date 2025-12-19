@@ -14,6 +14,7 @@ interface ThreeDCardProps {
     customImage?: string | null;
     customQuote?: string;
     platform?: string;
+    showWatermark?: boolean; // New Prop
     options?: {
         showAvatar: boolean;
         showBio: boolean;
@@ -28,7 +29,7 @@ interface ThreeDCardProps {
 const DEFAULT_THEME = { id: 'midnight', name: 'Midnight', bg: 'bg-gradient-to-br from-slate-900 to-slate-950', border: 'border-slate-800', text: 'text-slate-200', accent: 'text-blue-400', cell: 'bg-blue-500' };
 const DEFAULT_FONT = { id: 'sans', name: 'Modern Sans', class: 'font-sans' };
 
-export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font = DEFAULT_FONT, isPremium = false, customImage = null, customQuote = "", platform = "github", options }: ThreeDCardProps) {
+export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font = DEFAULT_FONT, isPremium = false, customImage = null, customQuote = "", platform = "github", showWatermark = false, options }: ThreeDCardProps) {
     const ref = useRef<HTMLDivElement>(null);
 
     // Mouse position state
@@ -96,7 +97,7 @@ export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font 
 
                 {stats ? (
                     <div className="relative">
-                        <div className="pointer-events-none">
+                        <div className="pointer-events-auto">
                             <RecapCard
                                 stats={stats}
                                 theme={theme}
@@ -106,6 +107,7 @@ export default function ThreeDCard({ stats, onEdit, theme = DEFAULT_THEME, font 
                                 customQuote={customQuote}
                                 platform={platform}
                                 id="preview-card-3d"
+                                showWatermark={showWatermark}
                                 options={options}
                             />
                         </div>

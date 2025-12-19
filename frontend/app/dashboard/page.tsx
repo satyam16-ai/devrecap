@@ -55,6 +55,7 @@ function DashboardContent() {
     const [activeFont, setActiveFont] = useState(FONTS[0]);
     const [isPremium, setIsPremium] = useState(false);
     const [customImage, setCustomImage] = useState<string | null>(null);
+    const [hasPaid, setHasPaid] = useState(false);
 
     // Visibility & Options
     const [showAvatar, setShowAvatar] = useState(true);
@@ -78,6 +79,10 @@ function DashboardContent() {
     const [exportFormat, setExportFormat] = useState<'card' | 'story'>('story');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Derived: Check if premium features are being used
+    const isProFeatureUsed = activeTheme.isPremium || activeFont.isPremium || !!customImage || isPremium;
+    const showWatermark = isProFeatureUsed && !hasPaid;
 
     useEffect(() => {
         let username = searchParams.get("username");
@@ -153,21 +158,14 @@ function DashboardContent() {
     };
 
     const handleDownloadClick = () => {
-        // Check if card is premium (Explicit toggle OR using premium features)
-        const isPremiumCard = isPremium ||
-            !!customImage ||
-            !!activeQuote ||
-            activeTheme.id !== THEMES[0].id ||
-            activeFont.name !== FONTS[0].name;
-
-        if (isPremiumCard) {
+        if (isProFeatureUsed && !hasPaid) {
             if (!user) {
                 setShowAuthModal(true);
             } else {
                 setShowPaymentModal(true);
             }
         } else {
-            setShowDonationModal(true);
+            downloadCard();
         }
     };
 
@@ -177,11 +175,12 @@ function DashboardContent() {
             const token = await user.getIdToken();
             await axios.post('/api/payment/consume', {
                 githubUsername: stats?.username,
-                year: new Date().getFullYear() // Or stats.year if available
+                year: new Date().getFullYear()
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            downloadCard();
+            setHasPaid(true);
+            setTimeout(() => downloadCard(), 200);
         } catch (err) {
             console.error("Consumption Failed", err);
             alert("Payment verified but download failed. Please try again from the download button.");
@@ -336,6 +335,7 @@ function DashboardContent() {
                             <div className="flex items-center gap-2">
                                 <div className={clsx("w-3 h-3 rounded-full", theme.cell.replace('bg-', 'bg-'))}></div>
                                 {theme.name}
+                                {theme.isPremium && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 ml-auto" />}
                             </div>
                         </button>
                     ))}
@@ -353,13 +353,14 @@ function DashboardContent() {
                             key={font.id}
                             onClick={() => setActiveFont(font)}
                             className={clsx(
-                                "px-4 py-2 rounded-lg text-sm border transition-all whitespace-nowrap",
+                                "px-4 py-2 rounded-lg text-sm border transition-all whitespace-nowrap flex items-center gap-2",
                                 activeFont.id === font.id
                                     ? "bg-slate-800 border-white text-white"
                                     : "bg-slate-950/50 border-slate-800 text-slate-400"
                             )}
                         >
                             {font.name}
+                            {font.isPremium && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
                         </button>
                     ))}
                 </div>
@@ -651,6 +652,7 @@ function DashboardContent() {
                                 customImage={customImage}
                                 customQuote={activeQuote}
                                 platform={platform}
+                                showWatermark={showWatermark}
                                 options={{
                                     showAvatar,
                                     showBio,

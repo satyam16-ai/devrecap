@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code } from "lucide-react";
 import clsx from "clsx";
 import { QRCodeSVG } from 'qrcode.react';
@@ -32,6 +34,7 @@ interface RecapCardProps {
     customQuote?: string; // New Prop
     platform?: string; // New Prop
     id?: string;
+    showWatermark?: boolean; // New Prop for watermark
     options?: {
         showAvatar: boolean;
         showBio: boolean;
@@ -43,9 +46,16 @@ interface RecapCardProps {
     };
 }
 
-export default function RecapCard({ stats, theme, font, isPremium, customImage, customQuote = "", platform = "github", id = "recap-card",
+export default function RecapCard({ stats, theme, font, isPremium, customImage, customQuote = "", platform = "github", id = "recap-card", showWatermark = false,
     options = { showAvatar: true, showBio: true, showHeatmap: true, showStats: true, showBadges: true, qrType: 'github', activityType: 'heatmap' }
 }: RecapCardProps) {
+    const [isHovered, setIsHovered] = useState(false);
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Correct QR URL based on platform if qrType is 'github' (which means profile)
     const getProfileUrl = () => {
@@ -55,16 +65,59 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
     const qrUrl = options.qrType === 'app' ? 'https://devrecap.site' : getProfileUrl();
 
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (showWatermark) {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        }
+    };
+
     return (
         <div
             id={id}
+            onMouseEnter={() => showWatermark && setIsHovered(true)}
+            onMouseLeave={() => showWatermark && setIsHovered(false)}
+            onMouseMove={handleMouseMove}
             className={clsx(
-                "relative w-[450px] min-h-[600px] rounded-[2rem] overflow-hidden p-8 flex flex-col shadow-2xl transition-all duration-500",
+                "relative w-[450px] min-h-[600px] rounded-[2rem] overflow-hidden p-8 flex flex-col shadow-2xl transition-all duration-300",
                 theme.bg,
                 isPremium ? "border-2 border-yellow-500/50 shadow-yellow-500/20" : `border ${theme.border}`,
                 font.class
             )}
+            style={{
+                transform: showWatermark && !isHovered ? 'scale(0.98)' : 'scale(1)',
+                cursor: showWatermark && isHovered ? 'none' : 'default'
+            }}
         >
+            {/* Hover Instruction Message with Backdrop Blur */}
+            {showWatermark && !isHovered && (
+                <div className="absolute inset-0 z-[100] flex items-center justify-center pointer-events-none backdrop-blur-[8px] transition-all duration-300">
+                    <div className="bg-black/90 border border-yellow-500/50 px-6 py-3 rounded-full shadow-2xl animate-pulse flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        <span className="text-sm font-bold text-yellow-100 uppercase tracking-widest">Hover to Preview</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Large Black Transparent Circle Cursor - Anti-Screenshot */}
+            {mounted && showWatermark && isHovered && createPortal(
+                <div
+                    className="pointer-events-none fixed z-[99999]"
+                    style={{
+                        left: `${mousePos.x}px`,
+                        top: `${mousePos.y}px`,
+                        transform: 'translate(-50%, -50%)',
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        border: '2px solid rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(0px)',
+                        boxShadow: '0 0 0 1px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.5)',
+                    }}
+                />,
+                document.body
+            )}
+
             {/* Custom BG Overlay */}
             {customImage && (
                 <img src={customImage} className="absolute inset-0 w-full h-full object-cover opacity-30 z-0" />

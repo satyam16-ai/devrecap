@@ -2,16 +2,18 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Github, LogOut, User, LogIn } from "lucide-react";
+import { Github, LogOut, User, LogIn, Clock } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import AuthModal from "./AuthModal";
+import TransactionHistoryModal from "./TransactionHistoryModal";
 
 export default function Navbar() {
     const { user, signOut } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -92,8 +94,19 @@ export default function Navbar() {
                                         <p className="text-xs text-slate-400 truncate">{user.email}</p>
                                     </div>
                                     <button
-                                        onClick={handleSignOut}
+                                        onClick={() => {
+                                            setShowHistoryModal(true);
+                                            setShowDropdown(false);
+                                        }}
                                         className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition"
+                                    >
+                                        <Clock className="w-4 h-4" />
+                                        Purchase History
+                                    </button>
+                                    <div className="h-px bg-slate-800 my-1"></div>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-slate-800 flex items-center gap-2 transition"
                                     >
                                         <LogOut className="w-4 h-4" />
                                         Sign Out
@@ -104,19 +117,20 @@ export default function Navbar() {
                     ) : (
                         <button
                             onClick={() => setShowAuthModal(true)}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold transition shadow-lg shadow-blue-500/20"
+                            className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20 transition flex items-center gap-2"
                         >
                             <LogIn className="w-4 h-4" />
-                            <span>Log In</span>
+                            Login
                         </button>
                     )}
                 </div>
             </div>
 
-            <AuthModal
-                isOpen={showAuthModal}
-                onClose={() => setShowAuthModal(false)}
-            />
+            {/* Auth Modal */}
+            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+            {/* History Modal (Global access via Navbar) */}
+            <TransactionHistoryModal isOpen={showHistoryModal} onClose={() => setShowHistoryModal(false)} />
         </motion.nav>
     );
 }
