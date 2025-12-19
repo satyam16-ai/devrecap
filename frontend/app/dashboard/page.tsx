@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { Loader2, Calendar, TrendingUp, Zap, Trophy, Download, Settings2, Palette, Type, Upload, Flame, Star, Share2, Instagram } from "lucide-react";
+import { Loader2, Calendar, TrendingUp, Zap, Trophy, Download, Settings2, Palette, Type, Upload, Flame, Star, Share2, Instagram, Clock } from "lucide-react";
 import * as htmlToImage from 'html-to-image';
 import download from 'downloadjs';
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ import AuthModal from "@/components/AuthModal";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
 import PaymentModal from "@/components/PaymentModal";
+import TransactionHistoryModal from "@/components/TransactionHistoryModal";
 import { useAuth } from "@/context/AuthContext";
 
 // --- Types ---
@@ -73,6 +74,7 @@ function DashboardContent() {
     const [showDonationModal, setShowDonationModal] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [exportFormat, setExportFormat] = useState<'card' | 'story'>('story');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -612,7 +614,16 @@ function DashboardContent() {
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800 z-50 shrink-0">
                 <Logo size={28} showText={true} />
-                <button onClick={() => router.push('/')} className="text-xs font-medium bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300">Exit</button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setShowHistoryModal(true)}
+                        className="p-2 text-slate-400 hover:text-white transition-colors"
+                        title="Transaction History"
+                    >
+                        <Clock className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => router.push('/')} className="text-xs font-medium bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300">Exit</button>
+                </div>
             </div>
 
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
@@ -685,10 +696,17 @@ function DashboardContent() {
                     >
 
                         {/* Desktop Title */}
-                        <div className="hidden lg:flex items-center gap-2 mb-6">
+                        <div className="hidden lg:flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Settings2 className="w-5 h-5 text-blue-500" /> Configuration
                             </h2>
+                            <button
+                                onClick={() => setShowHistoryModal(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-colors border border-slate-700"
+                            >
+                                <Clock className="w-3.5 h-3.5" />
+                                Purchase History
+                            </button>
                         </div>
 
                         {/* Mobile: Conditional Rendering based on Tab */}
@@ -791,13 +809,18 @@ function DashboardContent() {
                 onSuccess={() => setShowPaymentModal(true)}
             />
 
-            {/* Payment Modal */}
             <PaymentModal
                 isOpen={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
                 onSuccess={handlePaymentSuccess}
                 githubUsername={stats?.username || 'user'}
                 year={new Date().getFullYear()}
+                provider={platform}
+            />
+
+            <TransactionHistoryModal
+                isOpen={showHistoryModal}
+                onClose={() => setShowHistoryModal(false)}
             />
         </div>
     );

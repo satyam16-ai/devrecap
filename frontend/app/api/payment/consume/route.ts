@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Transaction from '@/models/Transaction';
-import { auth } from '@/lib/firebase-admin';
+
+async function verifyFirebaseToken(token: string) {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: token })
+    });
+    if (!response.ok) throw new Error("Invalid Auth Token");
+    const data = await response.json();
+    return data.users[0].localId;
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -11,12 +22,11 @@ export async function POST(req: NextRequest) {
         }
         const token = authHeader.split('Bearer ')[1];
 
-        let userId = '';
-        if (auth) {
-            const decoded = await auth.verifyIdToken(token);
-            userId = decoded.uid;
-        } else {
-            return NextResponse.json({ error: 'Config Missing' }, { status: 500 });
+        let userId;
+        try {
+            userId = await verifyFirebaseToken(token);
+        } catch {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { githubUsername, year } = await req.json();

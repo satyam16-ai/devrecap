@@ -47,8 +47,11 @@ Add all variables above in Vercel Dashboard → Settings → Environment Variabl
 - [ ] Go to Firebase Console → Authentication → Settings → Authorized domains
 - [ ] Add: `devrecap.site`
 - [ ] Add: `www.devrecap.site`
+- [ ] Add your Vercel URL (e.g., `frontend-*.vercel.app`) if testing on preview links
 - [ ] Verify `localhost` is present (for development)
 - [ ] Verify `devrecap-e8336.firebaseapp.com` is present
+
+**CRITICAL**: You MUST add `devrecap.site` here, otherwise you will get `auth/unauthorized-domain` error.
 
 ---
 

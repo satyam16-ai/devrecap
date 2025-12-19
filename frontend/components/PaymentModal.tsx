@@ -12,6 +12,7 @@ interface PaymentModalProps {
     onSuccess: () => void; // Called when payment is done or credit confirmed
     githubUsername: string;
     year: number;
+    provider: string;
 }
 
 declare global {
@@ -20,7 +21,7 @@ declare global {
     }
 }
 
-export default function PaymentModal({ isOpen, onClose, onSuccess, githubUsername, year }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, onSuccess, githubUsername, year, provider }: PaymentModalProps) {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -37,7 +38,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, githubUsernam
             const { data } = await axios.post('/api/payment/create-order', {
                 githubUsername,
                 year,
-                provider: user.providerData[0]?.providerId || 'firebase'
+                provider
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             }).catch(err => {

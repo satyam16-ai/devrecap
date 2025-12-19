@@ -2,7 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import connectToDatabase from '@/lib/mongodb';
 import Transaction from '@/models/Transaction';
-import { auth } from '@/lib/firebase-admin';
+
+async function verifyFirebaseToken(token: string) {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: token })
+    });
+    if (!response.ok) throw new Error("Invalid Auth Token");
+    const data = await response.json();
+    return data.users[0].localId;
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -11,21 +22,27 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         const token = authHeader.split('Bearer ')[1];
-        let userId = '';
 
-        if (auth) {
-            const decoded = await auth.verifyIdToken(token);
-            userId = decoded.uid;
-        } else {
-            return NextResponse.json({ error: 'Server Auth Config Missing' }, { status: 500 });
+        let userId;
+        try {
+            userId = await verifyFirebaseToken(token);
+        } catch {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
+        // Robust cleanup: remove whitespace AND surrounding quotes
+        // Also aggressive: remove anything not alphanumeric or underscore
+        const cleanKey = (key: string | undefined) => {
+            if (!key) return '';
+            return key.replace(/[^a-zA-Z0-9_]/g, '');
+        };
+
         // Verify Signature
         const body = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+            .createHmac('sha256', cleanKey(process.env.RAZORPAY_KEY_SECRET))
             .update(body.toString())
             .digest('hex');
 
@@ -35,7 +52,7 @@ export async function POST(req: NextRequest) {
 
         const transaction = await Transaction.findOne({
             razorpayOrderId: razorpay_order_id,
-            userId // Verify userId matches
+            userId
         });
 
         if (!transaction) {
