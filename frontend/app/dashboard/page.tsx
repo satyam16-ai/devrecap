@@ -14,6 +14,7 @@ import DonationModal from "@/components/DonationModal";
 import AuthModal from "@/components/AuthModal";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
+import PaymentModal from "@/components/PaymentModal";
 import { useAuth } from "@/context/AuthContext";
 
 // --- Types ---
@@ -71,12 +72,10 @@ function DashboardContent() {
     const [tempQuote, setTempQuote] = useState(''); // Quote in input
     const [showDonationModal, setShowDonationModal] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [exportFormat, setExportFormat] = useState<'card' | 'story'>('story');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // ... (rest of code)
-
 
     useEffect(() => {
         let username = searchParams.get("username");
@@ -152,17 +151,38 @@ function DashboardContent() {
     };
 
     const handleDownloadClick = () => {
-        // Check if premium features are enabled
-        const isPremiumCard = isPremium || customImage || activeQuote ||
+        // Check if card is premium (Explicit toggle OR using premium features)
+        const isPremiumCard = isPremium ||
+            !!customImage ||
+            !!activeQuote ||
             activeTheme.id !== THEMES[0].id ||
-            activeFont.id !== FONTS[0].id;
+            activeFont.name !== FONTS[0].name;
 
-        if (isPremiumCard && !user) {
-            // Require authentication for premium cards
-            setShowAuthModal(true);
+        if (isPremiumCard) {
+            if (!user) {
+                setShowAuthModal(true);
+            } else {
+                setShowPaymentModal(true);
+            }
         } else {
-            // Allow download for non-premium or authenticated users
             setShowDonationModal(true);
+        }
+    };
+
+    const handlePaymentSuccess = async () => {
+        try {
+            if (!user) return;
+            const token = await user.getIdToken();
+            await axios.post('/api/payment/consume', {
+                githubUsername: stats?.username,
+                year: new Date().getFullYear() // Or stats.year if available
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            downloadCard();
+        } catch (err) {
+            console.error("Consumption Failed", err);
+            alert("Payment verified but download failed. Please try again from the download button.");
         }
     };
 
@@ -268,7 +288,7 @@ function DashboardContent() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Oops!</h2>
+                    <h2 className="2xl font-bold text-white mb-3">Oops!</h2>
                     <p className="text-slate-300 mb-6 leading-relaxed">{error}</p>
                     <div className="flex gap-3 justify-center">
                         <button
@@ -768,10 +788,16 @@ function DashboardContent() {
             <AuthModal
                 isOpen={showAuthModal}
                 onClose={() => setShowAuthModal(false)}
-                onSuccess={() => {
-                    setShowAuthModal(false);
-                    setShowDonationModal(true);
-                }}
+                onSuccess={() => setShowPaymentModal(true)}
+            />
+
+            {/* Payment Modal */}
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={() => setShowPaymentModal(false)}
+                onSuccess={handlePaymentSuccess}
+                githubUsername={stats?.username || 'user'}
+                year={new Date().getFullYear()}
             />
         </div>
     );
