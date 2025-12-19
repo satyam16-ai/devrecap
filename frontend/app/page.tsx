@@ -97,7 +97,8 @@ export default function Home() {
   useEffect(() => {
     const fetchLegends = async () => {
       try {
-        const response = await axios.get("/api/hall-of-fame");
+        // v=3 ensures we bypass any stale cached response and get fresh data with new token
+        const response = await axios.get("/api/hall-of-fame?v=3");
         // Add font config locally since it's UI-specific
         const legendsWithFonts = response.data.map((item: any) => ({
           ...item,
@@ -439,7 +440,7 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
-                  href="https://github.com/yourusername/devrecap/issues/new"
+                  href="https://github.com/satyam16-ai/devrecap/issues/new"
                   target="_blank"
                   className="group flex items-center gap-3 bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
                 >
@@ -449,7 +450,7 @@ export default function Home() {
                 </Link>
 
                 <Link
-                  href="mailto:support@devrecap.site"
+                  href="mailto:satyamtiwari567890@gmail.com"
                   className="group flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 border border-slate-700"
                 >
                   <Mail className="w-5 h-5" />

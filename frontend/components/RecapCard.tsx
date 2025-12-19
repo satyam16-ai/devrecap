@@ -167,6 +167,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
                         {/* Visualization Switch */}
                         {(() => {
+                            if (!stats.history || !Array.isArray(stats.history)) return null;
                             const flatHistory = stats.history.flat();
                             const maxCount = Math.max(...flatHistory.map(d => d.count)) || 1;
 

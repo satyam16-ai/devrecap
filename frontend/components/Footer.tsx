@@ -9,7 +9,7 @@ export default function Footer() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
 
             <div className="max-w-7xl mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
                     {/* Brand Column */}
                     <div className="col-span-1 md:col-span-2 space-y-4">
                         <Logo size={40} showText={true} />
@@ -25,6 +25,17 @@ export default function Footer() {
                             <li><a href="#features" className="hover:text-blue-400 transition-colors">Features</a></li>
                             <li><a href="#hall-of-fame" className="hover:text-blue-400 transition-colors">Hall of Fame</a></li>
                             <li><a href="/dashboard" className="hover:text-blue-400 transition-colors">Create Card</a></li>
+                        </ul>
+                    </div>
+                    {/* Legal Column */}
+                    <div>
+                        <h3 className="font-bold text-white mb-4">Legal</h3>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                            <li><a href="/privacy-policy" className="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                            <li><a href="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</a></li>
+                            <li><a href="/refund" className="hover:text-blue-400 transition-colors">Refund Policy</a></li>
+                            <li><a href="/shipping" className="hover:text-blue-400 transition-colors">Shipping Policy</a></li>
+                            <li><a href="/contact" className="hover:text-blue-400 transition-colors">Contact Us</a></li>
                         </ul>
                     </div>
                     {/* Connect Column */}

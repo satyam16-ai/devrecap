@@ -121,15 +121,28 @@ function DashboardContent() {
 
         if (node) {
             try {
-                // If story, use opaque (no bg option). If card, use transparency.
+                // Wait for fonts and images to load
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 const options = exportFormat === 'card'
-                    ? { pixelRatio: 3, backgroundColor: null as any }
-                    : { pixelRatio: 3 };
+                    ? {
+                        pixelRatio: 3,
+                        backgroundColor: null as any,
+                        cacheBust: true,
+                        skipFonts: false
+                    }
+                    : {
+                        pixelRatio: 3,
+                        cacheBust: true,
+                        skipFonts: false
+                    };
 
                 const dataUrl = await htmlToImage.toPng(node, options);
                 download(dataUrl, `${stats?.username}-devrecap.png`);
             } catch (error) {
                 console.error('Download failed', error);
+                alert('Failed to generate image. Please try again or use a different browser.');
             }
         }
     };

@@ -1,0 +1,17 @@
+{
+    "name": "DevRecap - GitHub Year in Review",
+    "short_name": "DevRecap",
+    "description": "Transform your GitHub activity into stunning visual recaps",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#8b5cf6",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

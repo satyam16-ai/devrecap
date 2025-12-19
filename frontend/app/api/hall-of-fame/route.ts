@@ -16,8 +16,11 @@ export async function GET() {
     try {
         const promises = LEGENDS.map(async (legend) => {
             try {
-                // Pass process.env.GITHUB_TOKEN explicitly
-                const rawData = await fetchGitHubData(legend.username, process.env.GITHUB_TOKEN);
+                // Pass process.env.GITHUB_TOKEN explicitly and clean it
+                let token = (process.env.GITHUB_TOKEN || '').trim();
+                if (token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
+
+                const rawData = await fetchGitHubData(legend.username, token);
                 const processedData = processGitHubStats(rawData);
 
                 if (!processedData) return null;
