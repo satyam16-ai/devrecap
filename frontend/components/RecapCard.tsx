@@ -65,6 +65,87 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
     const qrUrl = options.qrType === 'app' ? 'https://devrecap.site' : getProfileUrl();
 
+    // --- Feature 1: Developer Persona (Free Feature) ---
+    // Calculate based on stats
+    const getDeveloperPersona = () => {
+        if (!stats) return "Code Explorer";
+        if (stats.longestStreak > 30) return "Consistency King";
+        if (stats.totalContributions > 2000) return "Commit Machine";
+        if (stats.totalContributions < 100) return "Junior Dev";
+
+        // Check weekend activity if history exists
+        if (stats.history && stats.history.length > 0) {
+            let weekendCommits = 0;
+            let totalCommits = 0;
+            stats.history.forEach(week => {
+                week.forEach((day, idx) => {
+                    if (day) {
+                        totalCommits += day.count;
+                        if (idx === 0 || idx === 6) weekendCommits += day.count;
+                    }
+                });
+            });
+            if (totalCommits > 0 && (weekendCommits / totalCommits) > 0.4) return "Weekend Warrior";
+        }
+
+        return "Full Stack Ninja";
+    };
+
+    const persona = getDeveloperPersona();
+
+    // --- Feature 2: Background Patterns (Premium Visuals) ---
+    const getThemePattern = () => {
+        if (['matrix', 'cyberpunk', 'fira'].includes(theme.id)) {
+            // Circuit / Tech Pattern
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <defs>
+                        <pattern id="circuit" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                            <path d="M10 10h10v10h-10z M50 50h10v10h-10z M80 20h10v10h-10z" fill="currentColor" />
+                            <path d="M20 15h30v2h-30z M60 55h20v2h-20z M15 20v20h2v-20z" fill="currentColor" />
+                            <circle cx="15" cy="15" r="2" fill="currentColor" />
+                            <circle cx="55" cy="55" r="2" fill="currentColor" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#circuit)" />
+                </svg>
+            );
+        }
+        if (['oceanic', 'ice', 'aurora'].includes(theme.id)) {
+            // Topographic / Waves Pattern
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                    <filter id='noiseFilter'>
+                        <feTurbulence type='fractalNoise' baseFrequency='0.6' stitchTiles='stitch' />
+                    </filter>
+                    <rect width='100%' height='100%' filter='url(#noiseFilter)' opacity="0.4" />
+                    <path d="M0 50 Q 112.5 100 225 50 T 450 50" stroke="currentColor" fill="none" className="opacity-30" strokeWidth="2" />
+                    <path d="M0 150 Q 112.5 200 225 150 T 450 150" stroke="currentColor" fill="none" className="opacity-30" strokeWidth="2" />
+                    <path d="M0 250 Q 112.5 300 225 250 T 450 250" stroke="currentColor" fill="none" className="opacity-30" strokeWidth="2" />
+                </svg>
+            );
+        }
+        if (['sunset', 'golden', 'lavender'].includes(theme.id)) {
+            // Grain + Gradient Overlay
+            return (
+                <div className="absolute inset-0 opacity-30 pointer-events-none mix-blend-overlay"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}
+                />
+            );
+        }
+        // Geometric / Hexagon for others
+        return (
+            <svg className="absolute inset-0 w-full h-full opacity-5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                <defs>
+                    <pattern id="hex" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="scale(0.5)">
+                        <path d="M20 0 L40 10 L40 30 L20 40 L0 30 L0 10 Z" fill="none" stroke="currentColor" strokeWidth="1" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#hex)" />
+            </svg>
+        );
+    };
+
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (showWatermark) {
             setMousePos({ x: e.clientX, y: e.clientY });
@@ -88,6 +169,16 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 cursor: showWatermark && isHovered ? 'none' : 'default'
             }}
         >
+            {/* 1. Theme Patterns (Behind everything) */}
+            <div className={clsx("absolute inset-0 pointer-events-none", isPremium ? "opacity-100" : "opacity-0")}>
+                {getThemePattern()}
+            </div>
+
+            {/* 2. Holographic Sheen (Premium Only) */}
+            {isPremium && (
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-white/5 pointer-events-none" />
+            )}
+
             {/* Hover Instruction Message with Backdrop Blur */}
             {showWatermark && !isHovered && (
                 <div className="absolute inset-0 z-[100] flex items-center justify-center pointer-events-none backdrop-blur-[8px] transition-all duration-300">
@@ -149,6 +240,12 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                     <span className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/5 text-[10px] uppercase font-bold tracking-widest text-white/70">
                         {platform === 'leetcode' ? 'LeetCode Recap 2025' : 'GitHub Recap 2025'}
                     </span>
+
+                    {/* Developer Persona Badge (New Feature) */}
+                    <div className="mb-4 mt-1 px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 backdrop-blur-md shadow-lg flex items-center gap-2">
+                        <Trophy className="w-3 h-3 text-yellow-400" />
+                        <span className="text-xs font-bold text-white tracking-wide">{persona}</span>
+                    </div>
                     {options.showAvatar && (
                         <div className={clsx(
                             "p-1.5 rounded-full mb-3",
@@ -311,14 +408,18 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 {/* 4. Core Stats */}
                 {options.showStats && (
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                        <div className={clsx("p-3 rounded-2xl border",
+                            isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
+                        )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
                                 {platform === 'leetcode' ? 'Problems Solved' : 'Total Commits'}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
                         </div>
-                        <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                        <div className={clsx("p-3 rounded-2xl border",
+                            isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
+                        )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" /> Best Streak
                             </div>

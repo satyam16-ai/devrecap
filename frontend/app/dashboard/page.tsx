@@ -56,6 +56,7 @@ function DashboardContent() {
     const [isPremium, setIsPremium] = useState(false);
     const [customImage, setCustomImage] = useState<string | null>(null);
     const [hasPaid, setHasPaid] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     // Visibility & Options
     const [showAvatar, setShowAvatar] = useState(true);
@@ -179,11 +180,26 @@ function DashboardContent() {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            // 1. Remove Watermark
             setHasPaid(true);
-            setTimeout(() => downloadCard(), 200);
+            setIsDownloading(true);
+
+            // 2. Wait for UI to update (remove watermark from DOM)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // 3. Trigger Download
+            await downloadCard();
+
+            // 4. Reload page to prevent re-download and reset session
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
         } catch (err) {
             console.error("Consumption Failed", err);
-            alert("Payment verified but download failed. Please try again from the download button.");
+            setIsDownloading(false);
+            alert("Payment verified but download failed. Please try again.");
         }
     };
 
@@ -824,6 +840,21 @@ function DashboardContent() {
                 isOpen={showHistoryModal}
                 onClose={() => setShowHistoryModal(false)}
             />
+
+            {/* Downloading Overlay */}
+            {isDownloading && (
+                <div className="fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center p-4 backdrop-blur-xl transition-all duration-500">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full animate-pulse" />
+                        <Loader2 className="w-16 h-16 text-yellow-500 animate-spin relative z-10" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mt-8 mb-2">Preparing Your Premium Card</h2>
+                    <p className="text-slate-400 text-center max-w-md animate-pulse">
+                        Generating high-quality 4K export...<br />
+                        <span className="text-xs opacity-50 text-slate-500 mt-2 block">Page will refresh automatically after download</span>
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
