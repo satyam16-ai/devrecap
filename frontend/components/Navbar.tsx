@@ -2,14 +2,16 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Github, LogOut, User } from "lucide-react";
+import { Github, LogOut, User, LogIn } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
+import AuthModal from "./AuthModal";
 
 export default function Navbar() {
     const { user, signOut } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -63,8 +65,8 @@ export default function Navbar() {
                         <span>Star</span>
                     </Link>
 
-                    {/* User Profile */}
-                    {user && (
+                    {/* User Profile or Login */}
+                    {user ? (
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setShowDropdown(!showDropdown)}
@@ -99,9 +101,22 @@ export default function Navbar() {
                                 </div>
                             )}
                         </div>
+                    ) : (
+                        <button
+                            onClick={() => setShowAuthModal(true)}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold transition shadow-lg shadow-blue-500/20"
+                        >
+                            <LogIn className="w-4 h-4" />
+                            <span>Log In</span>
+                        </button>
                     )}
                 </div>
             </div>
+
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+            />
         </motion.nav>
     );
 }
