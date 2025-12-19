@@ -2,10 +2,41 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Github } from "lucide-react";
+import { Github, LogOut, User } from "lucide-react";
 import Logo from "./Logo";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
+    const { user, signOut } = useAuth();
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        if (showDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDropdown]);
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            setShowDropdown(false);
+        } catch (error) {
+            console.error("Sign out error:", error);
+        }
+    };
+
     return (
         <motion.nav
             initial={{ y: -100, opacity: 0 }}
@@ -31,6 +62,44 @@ export default function Navbar() {
                         <Github className="w-4 h-4" />
                         <span>Star</span>
                     </Link>
+
+                    {/* User Profile */}
+                    {user && (
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={() => setShowDropdown(!showDropdown)}
+                                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-full transition"
+                            >
+                                {user.photoURL ? (
+                                    <img
+                                        src={user.photoURL}
+                                        alt={user.displayName || "User"}
+                                        className="w-6 h-6 rounded-full"
+                                    />
+                                ) : (
+                                    <User className="w-4 h-4" />
+                                )}
+                                <span className="text-sm hidden sm:inline">{user.displayName?.split(' ')[0] || 'User'}</span>
+                            </button>
+
+                            {/* Dropdown */}
+                            {showDropdown && (
+                                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-slate-800">
+                                        <p className="text-sm font-medium text-white truncate">{user.displayName}</p>
+                                        <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                                    </div>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </motion.nav>

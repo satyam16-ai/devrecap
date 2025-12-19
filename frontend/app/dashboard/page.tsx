@@ -11,8 +11,10 @@ import clsx from "clsx";
 import ThreeDCard from "@/components/ThreeDCard";
 import RecapCard from "@/components/RecapCard";
 import DonationModal from "@/components/DonationModal";
+import AuthModal from "@/components/AuthModal";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
+import { useAuth } from "@/context/AuthContext";
 
 // --- Types ---
 interface ContributionDay {
@@ -41,6 +43,7 @@ import { THEMES, FONTS } from "@/lib/constants";
 function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { user } = useAuth();
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -67,6 +70,7 @@ function DashboardContent() {
     const [activeQuote, setActiveQuote] = useState(''); // Quote shown on card
     const [tempQuote, setTempQuote] = useState(''); // Quote in input
     const [showDonationModal, setShowDonationModal] = useState(false);
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const [exportFormat, setExportFormat] = useState<'card' | 'story'>('story');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +152,18 @@ function DashboardContent() {
     };
 
     const handleDownloadClick = () => {
-        setShowDonationModal(true);
+        // Check if premium features are enabled
+        const isPremiumCard = isPremium || customImage || activeQuote ||
+            activeTheme.id !== THEMES[0].id ||
+            activeFont.id !== FONTS[0].id;
+
+        if (isPremiumCard && !user) {
+            // Require authentication for premium cards
+            setShowAuthModal(true);
+        } else {
+            // Allow download for non-premium or authenticated users
+            setShowDonationModal(true);
+        }
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -747,6 +762,16 @@ function DashboardContent() {
                 isOpen={showDonationModal}
                 onClose={() => setShowDonationModal(false)}
                 onDownload={downloadCard}
+            />
+
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                onSuccess={() => {
+                    setShowAuthModal(false);
+                    setShowDonationModal(true);
+                }}
             />
         </div>
     );
