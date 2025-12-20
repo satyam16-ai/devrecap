@@ -37,14 +37,13 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        // Find a PAID transaction that is NOT used AND matches the locked details
+        // Find a transaction that is PAID or USED (for retry)
         const transaction = await Transaction.findOne({
             userId,
             githubUsername,
             year,
-            status: 'PAID',
-            usedAt: { $exists: false }
-        });
+            status: { $in: ['PAID', 'USED'] }
+        }).sort({ createdAt: -1 });
 
         if (!transaction) {
             return NextResponse.json({
@@ -52,10 +51,22 @@ export async function POST(req: NextRequest) {
             }, { status: 403 });
         }
 
-        // Mark as USED
-        transaction.status = 'USED';
-        transaction.usedAt = new Date();
-        await transaction.save();
+        // Retry Logic
+        if (transaction.status === 'USED') {
+            const RETRY_WINDOW = 20 * 60 * 1000; // 20 Minutes
+            const timeSince = transaction.usedAt ? Date.now() - new Date(transaction.usedAt).getTime() : RETRY_WINDOW + 1;
+
+            if (timeSince > RETRY_WINDOW) {
+                return NextResponse.json({
+                    error: 'Premium credit expired. Please pay again.'
+                }, { status: 403 });
+            }
+        } else {
+            // First time mark as used
+            transaction.status = 'USED';
+            transaction.usedAt = new Date();
+            await transaction.save();
+        }
 
         return NextResponse.json({ success: true, txId: transaction._id });
     } catch (error: any) {

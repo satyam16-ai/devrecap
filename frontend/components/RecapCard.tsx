@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code, Zap } from "lucide-react";
 import clsx from "clsx";
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -276,8 +276,8 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             onMouseLeave={() => showWatermark && setIsHovered(false)}
             onMouseMove={handleMouseMove}
             className={clsx(
-                // FIXED 9:16 RATIO for Instagram Stories (450px x 800px)
-                "relative w-[450px] h-[800px] rounded-[2rem] overflow-hidden p-8 flex flex-col justify-between shadow-2xl transition-all duration-300",
+                // FIXED 9:16 RATIO (450px x 800px) with COMPACT PADDING
+                "relative w-[450px] h-[800px] rounded-[2rem] overflow-hidden p-6 flex flex-col justify-between shadow-2xl transition-all duration-300",
                 theme.bg,
                 isPremium ? "border-2 border-yellow-500/50 shadow-yellow-500/20" : `border ${theme.border}`,
                 font.class
@@ -378,7 +378,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                         </div>
                     )}
                     <h2 className={clsx(
-                        "text-3xl font-black leading-tight tracking-tight",
+                        "text-2xl font-black leading-tight tracking-tight mt-1",
                         isPremium ? "text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-yellow-300 to-yellow-100 drop-shadow-sm" : "text-white"
                     )}
                         style={isPremium ? { transform: 'translateZ(30px)' } : {}}
@@ -547,8 +547,8 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
                 {/* 4. Core Stats */}
                 {options.showStats && (
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className={clsx("p-3 rounded-2xl border",
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className={clsx("p-3 rounded-xl border",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
@@ -557,16 +557,15 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                             </div>
                             <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
                         </div>
-                        <div className={clsx("p-3 rounded-2xl border",
+                        <div className={clsx("p-3 rounded-xl border",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {theme.labels?.commits || (platform === 'leetcode' ? 'Problems Solved' : 'Total Commits')}
+                                <Zap className="w-3 h-3" /> Active Days
                             </div>
-                            <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
+                            <div className="text-xl font-bold text-white">{stats.activeDays}</div>
                         </div>
-                        <div className={clsx("p-3 rounded-2xl border",
+                        <div className={clsx("p-3 rounded-xl border col-span-2",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">

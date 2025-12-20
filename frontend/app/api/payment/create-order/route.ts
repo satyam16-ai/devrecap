@@ -74,14 +74,14 @@ export async function POST(req: NextRequest) {
                 }, { status: 400 });
             }
             if (existingTx.status === 'CREATED') {
-                // Return existing order 
+                // Resume existing order
                 return NextResponse.json({
-                    error: 'Pending payment exists',
-                    code: 'PENDING_PAYMENT',
-                    orderId: existingTx.razorpayOrderId,
+                    id: existingTx.razorpayOrderId,
                     amount: existingTx.amount * 100,
-                    currency: 'INR'
-                }, { status: 400 });
+                    currency: 'INR',
+                    resumed: true,
+                    key: cleanKey(process.env.RAZORPAY_KEY_ID)
+                });
             }
         }
 
