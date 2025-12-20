@@ -276,7 +276,8 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             onMouseLeave={() => showWatermark && setIsHovered(false)}
             onMouseMove={handleMouseMove}
             className={clsx(
-                "relative w-[450px] min-h-[600px] rounded-[2rem] overflow-hidden p-8 flex flex-col shadow-2xl transition-all duration-300",
+                // FIXED 9:16 RATIO for Instagram Stories (450px x 800px)
+                "relative w-[450px] h-[800px] rounded-[2rem] overflow-hidden p-8 flex flex-col justify-between shadow-2xl transition-all duration-300",
                 theme.bg,
                 isPremium ? "border-2 border-yellow-500/50 shadow-yellow-500/20" : `border ${theme.border}`,
                 font.class
