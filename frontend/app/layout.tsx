@@ -126,6 +126,19 @@ export default function RootLayout({
           {children}
         </AuthProvider>
         <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-W87TNESZK8"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-W87TNESZK8');
+          `}
+        </Script>
+        <Script
           id="razorpay-checkout-js"
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="lazyOnload"

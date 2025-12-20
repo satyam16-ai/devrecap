@@ -133,6 +133,121 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 />
             );
         }
+        if (theme.id === 'blueprint') {
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    <path d="M0 100 H450 M0 300 H450 M100 0 V600 M300 0 V600" stroke="currentColor" strokeWidth="1" strokeDasharray="5,5" opacity="0.3" />
+                </svg>
+            );
+        }
+        if (theme.id === 'retro') {
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                    <pattern id="pixels" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <rect x="0" y="0" width="10" height="10" fill="currentColor" opacity="0.5" />
+                        <rect x="10" y="10" width="10" height="10" fill="currentColor" opacity="0.5" />
+                    </pattern>
+                    <rect width="100%" height="100%" fill="url(#pixels)" />
+                </svg>
+            );
+        }
+        if (theme.id === 'neural') {
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="2" fill="currentColor"><animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" /></circle>
+                    <circle cx="400" cy="100" r="2" fill="currentColor"><animate attributeName="opacity" values="0.3;1;0.3" dur="4s" repeatCount="indefinite" /></circle>
+                    <circle cx="200" cy="300" r="2" fill="currentColor"><animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" /></circle>
+                    <circle cx="350" cy="500" r="2" fill="currentColor"><animate attributeName="opacity" values="0.3;1;0.3" dur="5s" repeatCount="indefinite" /></circle>
+                    <path d="M50 50 L200 300 L400 100 L350 500" stroke="currentColor" strokeWidth="1" opacity="0.5" fill="none" />
+                </svg>
+            )
+        }
+        if (theme.id === 'ronin') {
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Rising Sun */}
+                    <circle cx="50%" cy="30%" r="60" fill="#dc2626" opacity="0.3" />
+                    {/* Katana Slash */}
+                    <path d="M-50 400 L500 -50" stroke="#ef4444" strokeWidth="4" opacity="0.8" />
+                    <path d="M-20 420 L530 -30" stroke="#ef4444" strokeWidth="1" opacity="0.4" />
+                    {/* Ink Texture */}
+                    <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="0.8" /></filter>
+                    <rect width="100%" height="100%" filter="url(#ink)" opacity="0.15" />
+                </svg>
+            );
+        }
+        if (theme.id === 'anime') {
+            return (
+                <svg className="absolute inset-0 w-full h-full opacity-40 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="animeGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="transparent" />
+                            <stop offset="100%" stopColor="#f472b6" />
+                        </radialGradient>
+                    </defs>
+                    {/* Burst Lines */}
+                    {Array.from({ length: 40 }).map((_, i) => {
+                        const angle = (i / 40) * Math.PI * 2;
+                        const x2 = 50 + Math.cos(angle) * 80;
+                        const y2 = 50 + Math.sin(angle) * 80;
+                        return <path key={i} d={`M50 50 L${x2} ${y2}`} stroke="url(#animeGrad)" strokeWidth={Math.random()} opacity="0.5" />
+                    })}
+                </svg>
+            );
+        }
+        if (theme.id === 'stark') {
+            return (
+                <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#0891b2_0%,_transparent_70%)] opacity-30" />
+                    <svg className="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 100 100" style={{ animation: 'spin 20s linear infinite' }}>
+                        <circle cx="50" cy="50" r="30" stroke="#22d3ee" strokeWidth="0.5" fill="none" strokeDasharray="10 5" />
+                        <circle cx="50" cy="50" r="40" stroke="#22d3ee" strokeWidth="0.2" fill="none" />
+                        <path d="M50 10 L50 20 M50 80 L50 90 M10 50 L20 50 M80 50 L90 50" stroke="#22d3ee" strokeWidth="1" />
+                    </svg>
+                    <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 100 100" style={{ animation: 'spin 15s linear infinite reverse' }}>
+                        <circle cx="50" cy="50" r="25" stroke="#22d3ee" strokeWidth="1" fill="none" strokeDasharray="1 3" />
+                    </svg>
+                </div>
+            )
+        }
+        if (theme.id === 'spidey') {
+            return (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    {/* Web Center */}
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <ellipse key={i} cx="50" cy="50" rx={i * 10} ry={i * 8} fill="none" stroke="#ef4444" strokeWidth="0.3" opacity="0.6" />
+                    ))}
+                    {/* Radial Lines */}
+                    {Array.from({ length: 12 }).map((_, i) => (
+                        <path key={i} d={`M50 50 L${50 + Math.cos(i * Math.PI / 6) * 100} ${50 + Math.sin(i * Math.PI / 6) * 100}`} stroke="#ef4444" strokeWidth="0.3" opacity="0.6" />
+                    ))}
+                    {/* Eyes hint */}
+                    <path d="M35 45 Q 45 40 50 45" stroke="#fff" strokeWidth="2" fill="none" opacity="0.8" />
+                    <path d="M65 45 Q 55 40 50 45" stroke="#fff" strokeWidth="2" fill="none" opacity="0.8" />
+                </svg>
+            )
+        }
+        if (theme.id === 'knight') {
+            return (
+                <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden bg-black">
+                    {/* Rain */}
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+                    {/* Bat Signal Light */}
+                    <div className="absolute top-[-40px] left-[20%] w-[60%] h-[120%] bg-gradient-to-b from-yellow-500/20 to-transparent blur-2xl transform rotate-12" />
+                    {/* Signal Silhouette */}
+                    <svg className="absolute top-[10%] left-[35%] w-[30%] h-[20%] opacity-80 mix-blend-overlay" viewBox="0 0 100 60">
+                        <ellipse cx="50" cy="30" rx="40" ry="25" fill="#facc15" opacity="0.1" filter="blur(5px)" />
+                    </svg>
+                </div>
+            )
+        }
+
         // Geometric / Hexagon for others
         return (
             <svg className="absolute inset-0 w-full h-full opacity-5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
@@ -145,6 +260,8 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             </svg>
         );
     };
+
+
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (showWatermark) {
@@ -165,6 +282,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 font.class
             )}
             style={{
+                transformStyle: 'preserve-3d', // Enable 3D for children
                 transform: showWatermark && !isHovered ? 'scale(0.98)' : 'scale(1)',
                 cursor: showWatermark && isHovered ? 'none' : 'default'
             }}
@@ -254,16 +372,37 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                             <img
                                 src={stats.avatarUrl}
                                 className="w-20 h-20 rounded-full border-4 border-slate-950 object-cover"
+                                style={isPremium ? { transform: 'translateZ(40px)' } : {}}
                             />
                         </div>
                     )}
-                    <h2 className="text-3xl font-black text-white leading-tight tracking-tight">{stats.name || stats.username}</h2>
-                    <div className={clsx("text-sm font-semibold opacity-80 mt-1 flex items-center justify-center gap-1", theme.accent)}>
+                    <h2 className={clsx(
+                        "text-3xl font-black leading-tight tracking-tight",
+                        isPremium ? "text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-yellow-300 to-yellow-100 drop-shadow-sm" : "text-white"
+                    )}
+                        style={isPremium ? { transform: 'translateZ(30px)' } : {}}
+                    >
+                        {stats.name || stats.username}
+                    </h2>
+                    <div
+                        className={clsx("text-sm font-semibold opacity-80 mt-1 flex items-center justify-center gap-1.5", theme.accent)}
+                        style={isPremium ? { transform: 'translateZ(20px)' } : {}}
+                    >
                         @{stats.username}
-                        {isPremium && <CheckCircle2 className="w-4 h-4 text-blue-400 fill-blue-400/20" />}
+                        {isPremium && (
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-blue-500/50 blur-sm rounded-full" />
+                                <div className="relative bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-full p-[2px] shadow-lg">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-white" fill="transparent" strokeWidth={3} />
+                                </div>
+                            </div>
+                        )}
                     </div>
                     {isPremium && (
-                        <div className="mt-1 text-[10px] font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 uppercase">
+                        <div
+                            className="mt-1 text-[10px] font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 uppercase drop-shadow-md"
+                            style={{ transform: 'translateZ(20px)' }}
+                        >
                             Elite Developer
                         </div>
                     )}
@@ -413,7 +552,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                         )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {platform === 'leetcode' ? 'Problems Solved' : 'Total Commits'}
+                                {theme.labels?.commits || (platform === 'leetcode' ? 'Problems Solved' : 'Total Commits')}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
                         </div>
@@ -421,7 +560,16 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
                             <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" /> Best Streak
+                                <Calendar className="w-3 h-3" />
+                                {theme.labels?.commits || (platform === 'leetcode' ? 'Problems Solved' : 'Total Commits')}
+                            </div>
+                            <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
+                        </div>
+                        <div className={clsx("p-3 rounded-2xl border",
+                            isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
+                        )}>
+                            <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                                <TrendingUp className="w-3 h-3" /> {theme.labels?.streak || 'Best Streak'}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.longestStreak} days</div>
                         </div>
