@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code, Zap } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, Flame, Star, CheckCircle2, Github, Code } from "lucide-react";
 import clsx from "clsx";
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -52,9 +54,14 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
     const [isHovered, setIsHovered] = useState(false);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [mounted, setMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         setMounted(true);
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Correct QR URL based on platform if qrType is 'github' (which means profile)
@@ -276,8 +283,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             onMouseLeave={() => showWatermark && setIsHovered(false)}
             onMouseMove={handleMouseMove}
             className={clsx(
-                // FIXED 9:16 RATIO (450px x 800px) with COMPACT PADDING
-                "relative w-[450px] h-[800px] rounded-[2rem] overflow-hidden p-6 flex flex-col justify-between shadow-2xl transition-all duration-300",
+                "relative w-[450px] min-h-[600px] rounded-[2rem] overflow-hidden p-6 flex flex-col shadow-2xl transition-all duration-300",
                 theme.bg,
                 isPremium ? "border-2 border-yellow-500/50 shadow-yellow-500/20" : `border ${theme.border}`,
                 font.class
@@ -309,7 +315,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             )}
 
             {/* Large Black Transparent Circle Cursor - Anti-Screenshot */}
-            {mounted && showWatermark && isHovered && createPortal(
+            {mounted && showWatermark && isHovered && !isMobile && createPortal(
                 <div
                     className="pointer-events-none fixed z-[99999]"
                     style={{
@@ -343,7 +349,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
             )}
 
             {/* Content Container */}
-            <div className="relative z-20 h-full flex flex-col gap-6">
+            <div className="relative z-20 h-full flex flex-col gap-5">
 
                 {/* Platform Logo Watermark */}
                 <div className="absolute top-0 right-0 p-2 opacity-50">
@@ -372,13 +378,13 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                         )}>
                             <img
                                 src={stats.avatarUrl}
-                                className="w-20 h-20 rounded-full border-4 border-slate-950 object-cover"
+                                className="w-16 h-16 rounded-full border-4 border-slate-950 object-cover"
                                 style={isPremium ? { transform: 'translateZ(40px)' } : {}}
                             />
                         </div>
                     )}
                     <h2 className={clsx(
-                        "text-2xl font-black leading-tight tracking-tight mt-1",
+                        "text-2xl font-black leading-tight tracking-tight",
                         isPremium ? "text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-yellow-300 to-yellow-100 drop-shadow-sm" : "text-white"
                     )}
                         style={isPremium ? { transform: 'translateZ(30px)' } : {}}
@@ -429,7 +435,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 {(options.showStats) && (
                     <div className="flex items-end justify-between px-2">
                         <div className="flex flex-col">
-                            <span className="text-[10px] uppercase font-bold text-slate-500 mb-1">Rank</span>
+                            <span className={clsx("text-[10px] uppercase font-bold mb-1 opacity-60", theme.text)}>Rank</span>
                             <div className={clsx(
                                 "px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit",
                                 isPremium ? "bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg" : "bg-white/10 text-slate-300"
@@ -439,7 +445,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-[10px] uppercase font-bold text-slate-500 mb-1">Consistency</span>
+                            <span className={clsx("text-[10px] uppercase font-bold mb-1 opacity-60", theme.text)}>Consistency</span>
                             <div className={clsx("text-3xl font-black leading-none", theme.accent)}>
                                 {stats.consistencyScore}%
                             </div>
@@ -450,7 +456,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 {/* 3. Activity Visualization */}
                 {(options.showHeatmap || options.activityType) && (
                     <div className="space-y-2">
-                        <div className="flex items-center justify-between text-[10px] uppercase font-bold text-slate-500 px-1">
+                        <div className={clsx("flex items-center justify-between text-[10px] uppercase font-bold px-1 opacity-60", theme.text)}>
                             <span className="flex items-center gap-1"><Flame className="w-3 h-3" /> Activity</span>
                             <span>Last 3 Months</span>
                         </div>
@@ -486,7 +492,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
                             if (options.activityType === 'line') {
                                 return (
-                                    <div className="h-24 w-full bg-black/20 rounded-xl p-0 overflow-hidden relative border border-white/5">
+                                    <div className="h-20 w-full bg-black/20 rounded-xl p-0 overflow-hidden relative border border-white/5">
                                         <svg className="w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="none">
                                             {/* Gradient Fill */}
                                             <defs>
@@ -523,7 +529,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
                             // Bar Chart
                             return (
-                                <div className="h-24 w-full bg-black/20 rounded-xl px-2 pb-0 pt-4 flex items-end justify-between gap-[1px] border border-white/5 relative overflow-hidden">
+                                <div className="h-20 w-full bg-black/20 rounded-xl px-2 pb-0 pt-4 flex items-end justify-between gap-[1px] border border-white/5 relative overflow-hidden">
                                     {/* Dashed guidelines */}
                                     <div className="absolute inset-x-0 top-[25%] border-t border-dashed border-white/5" />
                                     <div className="absolute inset-x-0 top-[50%] border-t border-dashed border-white/5" />
@@ -547,28 +553,29 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
 
                 {/* 4. Core Stats */}
                 {options.showStats && (
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className={clsx("p-3 rounded-xl border",
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className={clsx("p-3 rounded-2xl border",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
-                            <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                            <div className={clsx("text-[10px] uppercase font-bold mb-1 flex items-center gap-1 opacity-60", theme.text)}>
                                 <Calendar className="w-3 h-3" />
                                 {theme.labels?.commits || (platform === 'leetcode' ? 'Problems Solved' : 'Total Commits')}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.totalContributions}</div>
                         </div>
-                        <div className={clsx("p-3 rounded-xl border",
+                        <div className={clsx("p-3 rounded-2xl border",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
-                            <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
-                                <Zap className="w-3 h-3" /> Active Days
+                            <div className={clsx("text-[10px] uppercase font-bold mb-1 flex items-center gap-1 opacity-60", theme.text)}>
+                                <Calendar className="w-3 h-3" />
+                                {platform === 'leetcode' ? 'Active Days' : 'Active Days'}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.activeDays}</div>
                         </div>
-                        <div className={clsx("p-3 rounded-xl border col-span-2",
+                        <div className={clsx("p-3 rounded-2xl border",
                             isPremium ? "bg-white/10 backdrop-blur-md border-white/20 shadow-lg" : "bg-white/5 border-white/5"
                         )}>
-                            <div className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                            <div className={clsx("text-[10px] uppercase font-bold mb-1 flex items-center gap-1 opacity-60", theme.text)}>
                                 <TrendingUp className="w-3 h-3" /> {theme.labels?.streak || 'Best Streak'}
                             </div>
                             <div className="text-xl font-bold text-white">{stats.longestStreak} days</div>
@@ -579,7 +586,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 {/* 5. Achievements Footer */}
                 {options.showBadges && (
                     <div className="mt-auto">
-                        <div className="text-[10px] uppercase font-bold text-slate-500 mb-2 px-1">Unlocked Badges</div>
+                        <div className={clsx("text-[10px] uppercase font-bold mb-2 px-1 opacity-60", theme.text)}>Unlocked Badges</div>
                         <div className="flex flex-wrap gap-2">
                             {stats.achievements.map((ach, i) => (
                                 <div
@@ -606,7 +613,7 @@ export default function RecapCard({ stats, theme, font, isPremium, customImage, 
                 {/* Footer Watermark & QR */}
                 <div className="flex justify-between items-end border-t border-white/5 pt-3 mt-auto">
                     <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-medium text-slate-600">Generated on {new Date().getFullYear()}</span>
+                        <span className={clsx("text-[9px] font-medium opacity-50", theme.text)}>Generated on {new Date().getFullYear()}</span>
                         <span className={clsx("font-bold text-[10px]", theme.accent)}>DevRecap.site</span>
                         {isPremium && (
                             <span className="text-[9px] font-bold text-yellow-500 uppercase tracking-wider flex items-center gap-1">

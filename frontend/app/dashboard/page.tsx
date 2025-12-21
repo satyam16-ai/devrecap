@@ -778,7 +778,7 @@ function DashboardContent() {
                     <div
                         id="story-export-card"
                         className={clsx(
-                            "w-[1080px] h-[1920px] flex items-center justify-center relative overflow-hidden",
+                            "w-[1080px] min-h-[1920px] flex items-center justify-center relative overflow-hidden py-[100px]",
                             activeTheme.bg
                         )}
                     >
@@ -787,8 +787,8 @@ function DashboardContent() {
                         <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px]" />
                         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-black/20 rounded-full blur-[100px]" />
 
-                        {/* The Card - Scaled for high resolution */}
-                        <div className="scale-[2.2] transform z-10">
+                        {/* The Card - Scaled for high resolution (Target ~950px width) */}
+                        <div className="scale-[2.1] transform z-10">
                             <RecapCard
                                 stats={stats!}
                                 theme={activeTheme}
@@ -803,12 +803,15 @@ function DashboardContent() {
                         </div>
 
                         {/* Branding */}
-                        <div className="absolute bottom-32 flex flex-col items-center gap-2 z-20">
-                            <div className="px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2">
-                                <span className="text-white font-bold text-lg tracking-widest uppercase">DevRecap.site</span>
+                        {/* Branding - Only for Free Users */}
+                        {!isPremium && (
+                            <div className="absolute bottom-32 flex flex-col items-center gap-2 z-20">
+                                <div className="px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2">
+                                    <span className="text-white font-bold text-lg tracking-widest uppercase">DevRecap.site</span>
+                                </div>
+                                <span className="text-white/50 text-base font-medium">Create your developer story</span>
                             </div>
-                            <span className="text-white/50 text-base font-medium">Create your developer story</span>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}

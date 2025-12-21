@@ -9,6 +9,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThreeDCard from "@/components/ThreeDCard";
+import OfferPopup from "@/components/OfferPopup";
 
 import { THEMES, FONTS } from "@/lib/constants";
 
@@ -67,6 +68,14 @@ export default function Home() {
   const [platform, setPlatform] = useState<'github' | 'leetcode'>('github');
   const [loading, setLoading] = useState(false);
   const [previewStats, setPreviewStats] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Real Hall of Fame Data
   const [legendsData, setLegendsData] = useState<any[]>([]);
@@ -151,12 +160,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-[family-name:var(--font-geist-sans)] selection:bg-purple-500/30 overflow-x-hidden relative">
+      <OfferPopup />
       <Navbar />
 
       {/* Animated Background Gradients */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '4s' }}></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '7s' }}></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[60px] md:blur-[120px] animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[60px] md:blur-[120px] animate-pulse" style={{ animationDuration: '7s' }}></div>
       </div>
 
       {/* Hero Section */}
@@ -289,7 +299,7 @@ export default function Home() {
             className="flex-1 w-full flex justify-center lg:justify-end hidden md:flex z-0 pointer-events-auto relative perspective-[2000px]"
           >
             <motion.div
-              variants={floatVariants}
+              variants={isMobile ? {} : floatVariants}
               initial="initial"
               animate="animate"
               className="scale-[0.65] lg:scale-[0.85] origin-top md:origin-center lg:origin-top-right relative z-10"

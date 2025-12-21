@@ -37,36 +37,28 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        // Find a transaction that is PAID or USED (for retry)
+        // Find a PAID transaction that is NOT used AND matches the locked details
+        // Find a PAID transaction that is NOT used
+        // We removed githubUsername check to avoid case-sensitivity issues
+        // If the user paid for a credit, they can use it for any username they currently view.
         const transaction = await Transaction.findOne({
             userId,
-            githubUsername,
             year,
-            status: { $in: ['PAID', 'USED'] }
-        }).sort({ createdAt: -1 });
+            status: 'PAID',
+            usedAt: { $exists: false }
+        });
 
         if (!transaction) {
+            // Check if there is a pending transaction to give better error?
             return NextResponse.json({
-                error: 'No active premium credit found for this specific username/year.'
+                error: 'No active premium credit found for this year. Please pay first.'
             }, { status: 403 });
         }
 
-        // Retry Logic
-        if (transaction.status === 'USED') {
-            const RETRY_WINDOW = 20 * 60 * 1000; // 20 Minutes
-            const timeSince = transaction.usedAt ? Date.now() - new Date(transaction.usedAt).getTime() : RETRY_WINDOW + 1;
-
-            if (timeSince > RETRY_WINDOW) {
-                return NextResponse.json({
-                    error: 'Premium credit expired. Please pay again.'
-                }, { status: 403 });
-            }
-        } else {
-            // First time mark as used
-            transaction.status = 'USED';
-            transaction.usedAt = new Date();
-            await transaction.save();
-        }
+        // Mark as USED
+        transaction.status = 'USED';
+        transaction.usedAt = new Date();
+        await transaction.save();
 
         return NextResponse.json({ success: true, txId: transaction._id });
     } catch (error: any) {

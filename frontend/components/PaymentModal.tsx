@@ -146,9 +146,21 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, githubUsernam
                             </div>
 
                             <h2 className="text-2xl font-bold text-white mb-2">Unlock Premium</h2>
-                            <p className="text-slate-400 mb-8 text-sm">
-                                Get high-quality downloads, remove watermarks, and access all premium themes for just <span className="text-white font-bold">₹10</span>.
+
+                            {/* Offer Badge */}
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-xs font-bold text-yellow-500 uppercase tracking-wider mb-4">
+                                <Sparkles className="w-3 h-3" /> Launch Offer
+                            </div>
+
+                            <p className="text-slate-400 mb-6 text-sm">
+                                Get high-quality downloads, remove watermarks, and access all premium themes.
                             </p>
+
+                            {/* Price Breakdown */}
+                            <div className="flex items-center justify-center gap-4 mb-8">
+                                <div className="text-slate-500 line-through text-lg">₹49</div>
+                                <div className="text-4xl font-black text-white">₹10</div>
+                            </div>
 
                             {error && (
                                 <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl mb-6 text-sm flex items-center gap-2 text-left">
@@ -161,13 +173,14 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, githubUsernam
                                 <button
                                     onClick={handlePayment}
                                     disabled={loading}
-                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
                                 >
                                     {loading ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />
                                     ) : (
                                         <>
-                                            Pay ₹10 & Download
+                                            <span>Pay ₹10 & Download</span>
+                                            <span className="bg-white/20 px-2 py-0.5 rounded text-xs line-through opacity-70">₹49</span>
                                         </>
                                     )}
                                 </button>
