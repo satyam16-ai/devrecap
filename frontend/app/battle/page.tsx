@@ -11,18 +11,7 @@ import { THEMES } from "@/lib/constants";
 import * as htmlToImage from 'html-to-image';
 import download from 'downloadjs';
 
-// Reuse Stats Interface
-interface Stats {
-    username: string;
-    name: string;
-    avatarUrl: string;
-    totalContributions: number;
-    activeDays: number;
-    longestStreak: number;
-    consistencyScore: number;
-    topLanguages: string[];
-    rank: string;
-}
+import type { Stats } from "@/components/RecapCard";
 
 export default function BattlePage() {
     const [u1, setU1] = useState("");
