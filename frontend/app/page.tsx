@@ -165,8 +165,8 @@ export default function Home() {
 
       {/* Animated Background Gradients */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[60px] md:blur-[120px] animate-pulse" style={{ animationDuration: '4s' }}></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[60px] md:blur-[120px] animate-pulse" style={{ animationDuration: '7s' }}></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[40px] md:blur-[120px] animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[40px] md:blur-[120px] animate-pulse" style={{ animationDuration: '7s' }}></div>
       </div>
 
       {/* Hero Section */}
@@ -273,6 +273,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
+                  aria-label="Generate Recap Card"
                   className="relative rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-[1px] h-14 w-full mt-2 overflow-hidden group shadow-lg shadow-purple-500/20"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform"></div>
@@ -388,6 +389,7 @@ export default function Home() {
                     : "w-2 bg-slate-700 hover:bg-slate-600"
                     }`}
                   aria-label={`Go to slide ${i + 1}`}
+                  aria-current={activeIndex === i ? 'true' : 'false'}
                 />
               ))}
             </div>
@@ -453,6 +455,7 @@ export default function Home() {
                   href="https://github.com/satyam16-ai/devrecap/issues/new"
                   target="_blank"
                   className="group flex items-center gap-3 bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+                  aria-label="Report issue on GitHub"
                 >
                   <Github className="w-5 h-5" />
                   <span>Report on GitHub</span>
@@ -462,6 +465,7 @@ export default function Home() {
                 <Link
                   href="mailto:satyamtiwari567890@gmail.com"
                   className="group flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 border border-slate-700"
+                  aria-label="Email support"
                 >
                   <Mail className="w-5 h-5" />
                   <span>Email Us</span>

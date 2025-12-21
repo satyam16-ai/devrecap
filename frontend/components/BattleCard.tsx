@@ -9,10 +9,12 @@ interface BattleCardProps {
     p2: Stats;
     winner: 'p1' | 'p2' | 'tie';
     theme: any;
+    font?: any;
+    customImage?: string | null;
     isPremium?: boolean;
 }
 
-export default function BattleCard({ p1, p2, winner, theme, isPremium = false }: BattleCardProps) {
+export default function BattleCard({ p1, p2, winner, theme, font, customImage, isPremium = false }: BattleCardProps) {
     // Helper to calculate score for internal weighting if needed, 
     // but the winner is passed in props to allow parent control.
 
@@ -52,8 +54,17 @@ export default function BattleCard({ p1, p2, winner, theme, isPremium = false }:
                 "relative w-[600px] min-h-[500px] rounded-[3rem] overflow-hidden p-8 flex flex-col shadow-2xl transition-all duration-300",
                 theme.bg,
                 isPremium ? "border-4 border-yellow-500/50 shadow-yellow-500/20" : `border-4 ${theme.border}`,
+                font?.class
             )}
         >
+            {/* Custom Background Image */}
+            {customImage && (
+                <div className="absolute inset-0 z-0">
+                    <img src={customImage} alt="Background" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+                    <div className="absolute inset-0 bg-black/40" /> {/* Dimmer */}
+                </div>
+            )}
+
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay pointer-events-none" />
             <div className="absolute inset-0 pointer-events-none">

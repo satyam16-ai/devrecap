@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Github, LogOut, User, LogIn, Clock } from "lucide-react";
 import Logo from "./Logo";
@@ -89,10 +90,12 @@ export default function Navbar() {
                                     className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-full transition"
                                 >
                                     {user.photoURL ? (
-                                        <img
+                                        <Image
                                             src={user.photoURL}
                                             alt={user.displayName || "User"}
-                                            className="w-6 h-6 rounded-full"
+                                            width={24}
+                                            height={24}
+                                            className="rounded-full"
                                         />
                                     ) : (
                                         <User className="w-4 h-4" />

@@ -7,9 +7,12 @@ import Link from 'next/link';
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import BattleCard from "@/components/BattleCard";
-import { THEMES } from "@/lib/constants";
+import { THEMES, FONTS } from "@/lib/constants";
 import * as htmlToImage from 'html-to-image';
 import download from 'downloadjs';
+import { DesignPanel } from "@/components/DesignPanel";
+import { Settings2, Palette } from "lucide-react";
+import clsx from "clsx";
 
 import type { Stats } from "@/components/RecapCard";
 
@@ -19,6 +22,13 @@ export default function BattlePage() {
     const [loading, setLoading] = useState(false);
     const [battleData, setBattleData] = useState<{ p1: Stats, p2: Stats, winner: 'p1' | 'p2' | 'tie' } | null>(null);
     const [error, setError] = useState("");
+
+    // Customization State
+    const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+    const [activeFont, setActiveFont] = useState(FONTS[0]);
+    const [isPremium, setIsPremium] = useState(false);
+    const [customImage, setCustomImage] = useState<string | null>(null);
+    const [showDesignPanel, setShowDesignPanel] = useState(false);
 
     const handleBattle = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -164,29 +174,83 @@ export default function BattlePage() {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ type: "spring", bounce: 0.4 }}
-                            className="flex flex-col items-center gap-8"
+                            className="w-full flex flex-col lg:flex-row items-start justify-center gap-10"
                         >
-                            {/* Card Container for Download */}
-                            <div id="battle-card-container" className="shadow-2xl shadow-red-500/10 rounded-[3rem]">
-                                <BattleCard
-                                    p1={battleData.p1}
-                                    p2={battleData.p2}
-                                    winner={battleData.winner}
-                                    theme={THEMES[0]} // Default Midnight Theme
-                                    isPremium={false}
+                            {/* Left Side: Card */}
+                            <div className="flex flex-col items-center gap-6">
+                                <div id="battle-card-container" className="shadow-2xl shadow-red-500/10 rounded-[3rem]">
+                                    <BattleCard
+                                        p1={battleData.p1}
+                                        p2={battleData.p2}
+                                        winner={battleData.winner}
+                                        theme={activeTheme}
+                                        font={activeFont}
+                                        isPremium={isPremium}
+                                        customImage={customImage}
+                                    />
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={downloadBattleCard}
+                                        className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center gap-2 transition-colors"
+                                    >
+                                        <Download className="w-5 h-5" /> Save Card
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDesignPanel(!showDesignPanel)}
+                                        className="lg:hidden px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center gap-2"
+                                    >
+                                        <Palette className="w-5 h-5" /> Customize
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Right Side: Customization Panel (Desktop) */}
+                            <div className="hidden lg:block w-full max-w-sm bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6">
+                                <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-800">
+                                    <Settings2 className="w-5 h-5 text-blue-500" />
+                                    <h2 className="font-bold text-lg">Battle Config</h2>
+                                </div>
+                                <DesignPanel
+                                    activeTheme={activeTheme}
+                                    setActiveTheme={setActiveTheme}
+                                    activeFont={activeFont}
+                                    setActiveFont={setActiveFont}
+                                    customImage={customImage}
+                                    setCustomImage={setCustomImage}
+                                    isPremium={isPremium}
+                                    setIsPremium={setIsPremium}
                                 />
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={downloadBattleCard}
-                                    className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center gap-2 transition-colors"
-                                >
-                                    <Download className="w-5 h-5" /> Save Card
-                                </button>
-                                {/* Add Share Logic if needed */}
-                            </div>
+                            {/* Mobile Slide-up Panel */}
+                            <AnimatePresence>
+                                {showDesignPanel && (
+                                    <motion.div
+                                        initial={{ y: "100%" }}
+                                        animate={{ y: 0 }}
+                                        exit={{ y: "100%" }}
+                                        className="fixed inset-x-0 bottom-0 z-50 bg-slate-950 border-t border-slate-800 p-6 rounded-t-3xl shadow-xl lg:hidden max-h-[80vh] overflow-y-auto"
+                                    >
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h2 className="font-bold text-lg">Customize Battle</h2>
+                                            <button onClick={() => setShowDesignPanel(false)} className="text-slate-400">Close</button>
+                                        </div>
+                                        <DesignPanel
+                                            activeTheme={activeTheme}
+                                            setActiveTheme={setActiveTheme}
+                                            activeFont={activeFont}
+                                            setActiveFont={setActiveFont}
+                                            customImage={customImage}
+                                            setCustomImage={setCustomImage}
+                                            isPremium={isPremium}
+                                            setIsPremium={setIsPremium}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                         </motion.div>
                     )}
                 </AnimatePresence>
